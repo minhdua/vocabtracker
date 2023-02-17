@@ -1,0 +1,19 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore cache and log files
+__pycache__/
+*.log
+
+# Ignore database files
+db.sqlite3
+
+# Ignore static files
+staticfiles/
+
+# Ignore virtual environment folder
+venv/
+
+# Ignore other generated files
+*.swp
+.DS_Store
