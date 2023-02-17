@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block include %} {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/css/list.css' %}" />
+{% endblock %} {% block content %}
+<h1>Topics</h1>
+{% include 'add_topic.html' %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<button type="button" id="add-topic-btn" class="btn btn-primary btn-add" data-bs-toggle="modal" data-bs-target="#addTopicModal">Add</button>
+		</div>
+	</div>
+	<div class="row row-cols-2 row-cols-md-4 g-4">
+		{% for topic in topics %}
+		<!-- prettier-ignore -->
+		{% include '_topic_card.html' with title=topic.name description=topic.description image_url=topic.image_url %}
+		<!-- prettier-ignore -->
+		{% endfor %}
+	</div>
+</div>
+{% endblock %} {% block javascript %}
+<script src="{% static 'js/list.js' %}"></script>
+
+{% endblock %}

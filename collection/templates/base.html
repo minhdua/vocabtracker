@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi" xml:lang="vi" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.css' %}" />
+    <title>{% block title %}Default Title{% endblock %}</title>
+    {% block include %}{% endblock %}
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{% static 'images/favicon-16x16.png'%}"
+    />
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+    {% block javascript %}{% endblock %}
+  </body>
+</html>

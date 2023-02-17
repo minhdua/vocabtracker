@@ -1,0 +1,8 @@
+td[contenteditable="true"] {
+  border: 1px solid #ccc;
+}
+
+td[contenteditable="true"]:focus {
+  background-color: #f7dc6f;
+  border: 2px solid #f1c40f;
+}
