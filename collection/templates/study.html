@@ -1,0 +1,97 @@
+{% extends 'base.html' %} {% block title %}Vocabulary{% endblock %} {% block include %} {% load static %} {% load collection_filters %}
+<link rel="stylesheet" type="text/css" href="{% static '/css/study.css' %}" />
+{% endblock %} {% block content %}
+<div class="container">
+	<h1>Vocabulary</h1>
+	<div class="navigation">
+		<button id="prev-btn" disabled>&lt; Previous</button>
+		<button id="sound-btn">Sound On</button>
+		<button id="next-btn">Next &gt;</button>
+	</div>
+	<table id="vocab-table">
+		<thead>
+			<tr>
+				<th>No.</th>
+				<th>Word</th>
+				<th>Pronunciation</th>
+				<th>Meaning</th>
+				<th>Correct Attempts</th>
+				<th>Total Checks</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- Placeholder rows for data -->
+			<tr>
+				<td id="no"></td>
+				<td id="word"></td>
+				<td id="pronunciation"></td>
+				<td id="meaning"></td>
+				<td id="correct-attempts"></td>
+				<td id="correct-checks"></td>
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="4" id="total-word"></td>
+				<td id="total-correct">0</td>
+				<td id="total-checks">0</td>
+			</tr>
+		</tfoot>
+	</table>
+	<div id="incorrect-last" hidden style="backgroundcolor: #f8d7da; color: #721c24; padding: 1rem; border: 1px solid #f5c6cb; borderradius: 0.25rem">
+		A wild error has appeared!
+	</div>
+	<div class="terminal">
+		<label for="input-field">Enter the meaning:</label>
+		<textarea
+			id="terminal"
+			style="
+				box-sizing: border-box;
+				border-radius: 4px;
+				border: 1px solid #d3d3d3;
+				padding: 10px 15px;
+				font-size: 36px;
+				margin-bottom: 20px;
+				width: 100%;
+				color: #555;
+				font-family: 'Roboto', sans-serif;
+				font-weight: bold;
+				outline: none;
+				transition: border-color 0.2s ease;
+				resize: vertical;
+			"
+			rows="4"></textarea>
+
+		<p id="message"></p>
+	</div>
+</div>
+<input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" />
+<p>Lệnh <code>\pre</code>: Di chuyển ngược lại từ trước đó.</p>
+<p>Cú pháp: <code>\pre [number]</code></p>
+<p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ đầu tiên trong danh sách, nó sẽ dừng lại ở từ đầu tiên.</p>
+<p>Ví dụ: <code>\pre 3</code> sẽ bỏ qua 3 từ trước đó.</p>
+
+<p>Lệnh <code>\next</code>: Di chuyển tiến tới từ tiếp theo.</p>
+<p>Cú pháp: <code>\next [number]</code></p>
+<p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ cuối cùng trong danh sách, nó sẽ dừng lại ở từ cuối cùng.</p>
+<p>Ví dụ: <code>\next 3</code> sẽ bỏ qua 3 từ tiếp theo.</p>
+
+<p>Lệnh <code>\goto</code>: Di chuyển tới từ ở vị trí thứ number trong danh sách.</p>
+<p>Cú pháp: <code>\goto &lt;number&gt;</code></p>
+<p><em>number</em>: vị trí từ cần di chuyển tới. Nếu number lớn hơn độ dài danh sách hoặc nhỏ hơn 1, lệnh sẽ không có tác dụng.</p>
+<p>Ví dụ: <code>\goto 5</code>sẽ di chuyển tới từ thứ 5 trong danh sách.</p>
+
+<p>Lệnh <code>\sound --off</code>: Tắt âm thanh phát ra khi hiển thị từ.</p>
+<p>Ví dụ: <code>\sound --off</code> sẽ tắt âm thanh phát ra.</p>
+<p>Lệnh <code>\sound --on</code>: Bật lại âm thanh phát ra khi hiển thị từ.</p>
+<p>Cú pháp: <code>\sound --on</code></p>
+<p>Ví dụ: <code>\sound --on</code> sẽ bật lại âm thanh phát ra.</p>
+
+<p>Lệnh <code>\review</code>: Chuyển đến trang đánh giá với các từ được chọn.</p>
+<p>Cú pháp: <code>\review [--from &lt;number&gt;] [--to &lt;number&gt;]</code></p>
+<p><em>--from</em> (tùy chọn): chỉ số của từ đầu tiên trong danh sách được đánh giá, mặc định là 1.</p>
+<p><em>--to</em> (tùy chọn): chỉ số của từ cuối cùng trong danh sách được đánh giá, mặc định là số lượng từ trong danh sách.</p>
+<p>Ví dụ: <code>\review --from 3 --to 7</code>sẽ chuyển đến trang đánh giá các từ vựng từ 3 đến 7</p>
+{% endblock%} {% block javascript %}
+<script type="module" src="{% static 'js/study.js' %}"></script>
+{% endblock %}

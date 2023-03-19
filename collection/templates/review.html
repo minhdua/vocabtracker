@@ -1,0 +1,29 @@
+{% extends 'base.html' %} {% block title %}Review{% endblock %} {% block include %} {% load static %} {% load collection_filters %}
+<link rel="stylesheet" type="text/css" href="{% static '/css/review.css' %}" />
+{% endblock %} {% block content %}
+
+<form action="#" method="post">
+	{% csrf_token %} {% for question in questions %}
+	<div class="question" id="question-{{forloop.counter}}" style="background-color: #f5f5f5; padding: 20px; border: 1px solid #cccccc; border-radius: 4px; font-size: 16px">
+		<p style="margin-bottom: 5px">{{forloop.counter}}. {{ question.question }}</p>
+		<label style="margin-right: 10px">
+			{% for answer in question.distractors %}
+			<div class="answer">
+				<input type="radio" id="answer{{ forloop.parentloop.counter }}_{{ forloop.counter }}" name="answer{{ forloop.parentloop.counter }}" value="{{ answer }}" />
+				{{ answer }}
+			</div>
+			{% endfor %}
+			<input type="checkbox" id="unsure" name="flag" value="unsure" />
+			<input type="hidden" name="correct_answer" value="{{ question.correct_answer }}" />
+			<input type="hidden" name="word_check" value="{{ question.word }}" />
+			<input type="hidden" name="word_id" value="{{ question.word_id }}" />
+		</label>
+	</div>
+	{% endfor %}
+	<!-- <input type="submit" value="Trả lời" /> -->
+	<input id="submit" type="button" value="Trả lời" />
+</form>
+
+{% endblock %} {% block javascript %}
+<script type="module" src="{% static 'js/review.js' %}"></script>
+{% endblock %}

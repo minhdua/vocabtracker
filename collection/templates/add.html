@@ -22,12 +22,28 @@
         <td>{{ form.word }}</td>
         <td>{{ form.pronunciation }}</td>
         <td>{{ form.meaning }}</td>
-        <td><i class="fa fa-times remove-row"></i></td>
+        <td>
+          {% if form.id.value %}
+          <input
+            type="hidden"
+            name="{{ form.prefix }}-id"
+            value="{{ form.id.value }}"
+          />
+          {% endif %}
+          <i class="fa fa-times remove-row"></i>
+        </td>
       </tr>
       {% endwith %} {% endfor %}
     </tbody>
   </table>
-  <button id="add-row" class="btn btn-primary" type="button">Add</button>
+  <button
+    id="add-row"
+    class="btn btn-primary"
+    type="button"
+    data-formset="{{ formset.prefix }}"
+  >
+    Add
+  </button>
 </form>
 {% endblock %} {% block javascript %}
 <script src="{% static 'js/add.js' %}"></script>

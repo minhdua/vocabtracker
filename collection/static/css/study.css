@@ -1,0 +1,51 @@
+body {
+	font-family: Arial, sans-serif;
+	font-size: 16px;
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+th,
+td {
+	padding: 10px;
+	border: 1px solid black;
+	text-align: center;
+}
+th {
+	background-color: #eee;
+}
+tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+.navigation {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+.terminal {
+	margin-top: 20px;
+}
+#message {
+	margin-top: 10px;
+	color: red;
+	font-weight: bold;
+}
+#vocab-table tfoot {
+	background-color: #f5f5f5;
+}
+
+#vocab-table tfoot td {
+	font-weight: bold;
+	text-align: center;
+	padding: 5px;
+}
+
+#total-checks -sum {
+	color: #337ab7;
+}
+
+#total-correct {
+	color: #5cb85c;
+}
