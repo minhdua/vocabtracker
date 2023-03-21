@@ -23,15 +23,6 @@ $(document).ready(function () {
 			var correctAnswer = $(element).find('input[name="correct_answer"]').val();
 			// Lấy giá trị của câu trả lời được chọn
 			var selectedAnswer = $(element).find('.answer input[type="radio"]:checked').val();
-			var flag = false;
-			if ($(element).find('input[name="flag"').is(":checked")) {
-				flag = true;
-			}
-
-			var flagUncheckIfNull = false;
-			if ($(element).find('input[name="uncheckifnull"').is(":checked")) {
-				flagUncheckIfNull = true;
-			}
 
 			// Kiểm tra xem câu trả lời được chọn có khớp với câu trả lời đúng hay không
 			if (selectedAnswer && selectedAnswer == correctAnswer) {
@@ -41,6 +32,9 @@ $(document).ready(function () {
 					.parent()
 					.css("color", "#b7e1cd")
 					.css("background-color", "#0f5132");
+				if (!flagUncheckIfNull) {
+					$(element).find('input[name="flag"').prop("checked", false);
+				}
 			} else {
 				if (!selectedAnswer && flagUncheckIfNull) {
 					return;
@@ -55,6 +49,16 @@ $(document).ready(function () {
 					.css("background-color", "#cfe2f3");
 
 				$(element).find('input[name="flag"').prop("checked", true);
+			}
+
+			var flag = false;
+			if ($(element).find('input[name="flag"').is(":checked")) {
+				flag = true;
+			}
+
+			var flagUncheckIfNull = false;
+			if ($(element).find('input[name="uncheckifnull"').is(":checked")) {
+				flagUncheckIfNull = true;
 			}
 
 			questions.push({

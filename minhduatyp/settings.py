@@ -96,27 +96,26 @@ DATABASES = {
     #     'PORT':'3306'
     # }
 
+    # 'default': {
+
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'vocabtracker',  # replace with your database name
+    #     'HOST': 'localhost',
+    #     'PORT': 5432,
+    #     'USER': 'minhdua',
+    #     'PASSWORD': 'vocabtracker12345678'
+    # }
+
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vocabtracker',  # replace with your database name
-        'HOST': 'localhost',
+        'NAME': 'qjbgruvq',  # replace with your database name
+        'HOST': 'floppy.db.elephantsql.com',
         'PORT': 5432,
-        'USER': 'minhdua',
-        'PASSWORD': 'vocabtracker12345678'
+        'USER': 'qjbgruvq',
+        'PASSWORD': 'AVUpge201Nfd-P9OmH6LCuGiIe_0Itwf'
     }
-
-    #       'default': {
-
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': 'vocabtracker',  # replace with your database name
-    #         'HOST': 'ep-little-band-336241.us-east-2.aws.neon.tech',
-    #         'PORT': 5432,
-    #         'USER': 'minhdua',
-    #         'PASSWORD': 'CfIFi3pz8BTl'
-    #     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

@@ -292,6 +292,7 @@ $(document).ready(function () {
 				i = lines.length; // break out of the loop
 				displayWord();
 				clearInput();
+				pauseTimer();
 				isCommands = true;
 			}
 		}
