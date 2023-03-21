@@ -139,7 +139,9 @@ def review(request, topic_id):
         'word': vocab['word'] ,
         'question':question_text,
         'correct_answer': correct_answer,
-        'distractors': answers
+        'distractors': answers,
+        'flag':vocab['flag'],
+        'uncheck_ifnull':vocab['uncheck_ifnull']
         }
         questions.append(question)
     shuffle(questions)
@@ -155,10 +157,14 @@ def handle_review(request):
             word = Vocabulary.objects.get(id=question['word_id'])
             if not word:
                 continue
+            word.flag = question['flag']
+            word.uncheck_ifnull = question['uncheck_ifnull']
             word.checks_total = word.checks_total + 1
             if question['answer'] == question['correct_answer']:
                 word.checks_correct = word.checks_correct + 1
             else :
+                if question['answer'] == 'no answer' and word.uncheck_ifnull:
+                    continue
                 if not word.checks_incorrect:
                     word.checks_incorrect = []
                 word.checks_incorrect.append(question['answer'])

@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-#Auto Reload
+# Auto Reload
 
 # Application definition
 
@@ -86,7 +86,7 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
-    
+
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'mdtype',
@@ -95,16 +95,26 @@ DATABASES = {
     #     'HOST':'localhost',
     #     'PORT':'3306'
     # }
-    
-     'default': {
-   
+
+    'default': {
+
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vocabtracker', # replace with your database name
+        'NAME': 'vocabtracker',  # replace with your database name
         'HOST': 'localhost',
         'PORT': 5432,
-        'USER':'minhdua',
-        'PASSWORD':'vocabtracker12345678'
+        'USER': 'minhdua',
+        'PASSWORD': 'vocabtracker12345678'
     }
+
+    #       'default': {
+
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': 'vocabtracker',  # replace with your database name
+    #         'HOST': 'ep-little-band-336241.us-east-2.aws.neon.tech',
+    #         'PORT': 5432,
+    #         'USER': 'minhdua',
+    #         'PASSWORD': 'CfIFi3pz8BTl'
+    #     }
 }
 
 

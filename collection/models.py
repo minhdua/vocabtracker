@@ -34,6 +34,9 @@ class Vocabulary(models.Model):
         max_length=255), blank=True, null=True, default=list)
     topic = models.ForeignKey(
         Topic, on_delete=models.CASCADE, related_name='vocabulary')
+    flag = models.BooleanField(default=True)
+    uncheck_ifnull = models.BooleanField(default=False)
+    # study_time = 
 
 
 class Question(models.Model):

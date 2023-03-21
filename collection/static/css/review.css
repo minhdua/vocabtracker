@@ -67,3 +67,9 @@ input[type="checkbox"]:checked::before {
 input[type="checkbox"][indeterminate]::before {
 	background-color: #999;
 }
+
+label[for="flag"],
+label[for="uncheckifnull"] {
+	font-weight: normal;
+	font-size: small;
+}

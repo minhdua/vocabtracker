@@ -13,7 +13,10 @@
 				{{ answer }}
 			</div>
 			{% endfor %}
-			<input type="checkbox" id="unsure" name="flag" value="unsure" />
+			<input type="checkbox" name="flag" {% if question.flag %}checked{% endif %} />
+			<label for="flag">Đánh dấu</label>
+			<input type="checkbox" name="uncheckifnull" {% if question.uncheck_ifnull %}checked{% endif %} />
+			<label for="uncheckifnull">Không chấm nếu không chọn</label>
 			<input type="hidden" name="correct_answer" value="{{ question.correct_answer }}" />
 			<input type="hidden" name="word_check" value="{{ question.word }}" />
 			<input type="hidden" name="word_id" value="{{ question.word_id }}" />

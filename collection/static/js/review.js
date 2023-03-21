@@ -23,11 +23,16 @@ $(document).ready(function () {
 			var correctAnswer = $(element).find('input[name="correct_answer"]').val();
 			// Lấy giá trị của câu trả lời được chọn
 			var selectedAnswer = $(element).find('.answer input[type="radio"]:checked').val();
-			questions.push({
-				word_id: word_id,
-				answer: selectedAnswer || "no answer",
-				correct_answer: correctAnswer,
-			});
+			var flag = false;
+			if ($(element).find('input[name="flag"').is(":checked")) {
+				flag = true;
+			}
+
+			var flagUncheckIfNull = false;
+			if ($(element).find('input[name="uncheckifnull"').is(":checked")) {
+				flagUncheckIfNull = true;
+			}
+
 			// Kiểm tra xem câu trả lời được chọn có khớp với câu trả lời đúng hay không
 			if (selectedAnswer && selectedAnswer == correctAnswer) {
 				// Nếu khớp, đặt màu xanh lá cây cho câu trả lời được chọn
@@ -37,6 +42,9 @@ $(document).ready(function () {
 					.css("color", "#b7e1cd")
 					.css("background-color", "#0f5132");
 			} else {
+				if (!selectedAnswer && flagUncheckIfNull) {
+					return;
+				}
 				// Nếu không khớp, đặt màu đỏ cho câu trả lời được chọn
 				$(element).find('.answer input[type="radio"]:checked').parent().css("color", "#842029").css("background-color", "#f8d7da");
 				//Tô màu xanh cho câu trả lời đúng
@@ -45,7 +53,17 @@ $(document).ready(function () {
 					.parent()
 					.css("color", "#1e4477")
 					.css("background-color", "#cfe2f3");
+
+				$(element).find('input[name="flag"').prop("checked", true);
 			}
+
+			questions.push({
+				word_id: word_id,
+				answer: selectedAnswer || "no answer",
+				correct_answer: correctAnswer,
+				flag: flag,
+				uncheck_ifnull: flagUncheckIfNull,
+			});
 		});
 
 		$.ajax({

@@ -1,10 +1,24 @@
 import { speech } from "./sound.js";
 import "./ajax-settings.js";
+import colors from "./const.js";
 $(document).ready(function () {
 	var vocabularies = JSON.parse($("#vocabularies-data").val());
 
-	var soundOn = false;
+	var soundOn = true;
 	var currentIndex = 0;
+
+	let timer;
+	let startTime;
+	var path = window.location.pathname;
+	var mode = 0; //normal
+	var pausedTime = null;
+	// Tách đường dẫn thành các phần bằng dấu "/"
+	var paths = path.split("/").filter(function (path) {
+		return path !== "";
+	});
+
+	// Lấy phần tử cuối cùng trong mảng parts, đó chính là số 2
+	var topicId = paths[paths.length - 1];
 
 	function updateAttemptsTotal() {
 		var attempts_total = 0;
@@ -27,7 +41,8 @@ $(document).ready(function () {
 	function displayWord() {
 		var currentWord = getCurrentWord();
 		$("#no").text(currentIndex + 1);
-		$("#word").text(currentWord.word);
+		if (mode === 0) $("#word").text(currentWord.word);
+		else $("#word").text("");
 		$("#meaning").text(currentWord.meaning);
 		$("#pronunciation").text(currentWord.pronunciation);
 		$("#correct-attempts").text(`${currentWord.attempts_correct || 0}/${currentWord.attempts_total || 0}`);
@@ -38,6 +53,18 @@ $(document).ready(function () {
 		}
 		checkOnOffButton();
 		updateAttemptsTotal();
+
+		var topicStorage = JSON.parse(localStorage.getItem("currentIndex"));
+		if (!topicStorage) {
+			topicStorage = new Object();
+		}
+		topicStorage[topicId] = currentIndex;
+		localStorage.setItem("currentIndex", JSON.stringify(topicStorage));
+		if (currentWord.flag) {
+			$("th i.fa-bookmark").removeAttr("hidden", true);
+		} else {
+			$("th i.fa-bookmark").attr("hidden", true);
+		}
 	}
 
 	function checkOnOffButton() {
@@ -53,13 +80,19 @@ $(document).ready(function () {
 		}
 
 		if (soundOn) {
-			$(this).text("Sound On");
+			$("#sound-btn").text("Sound Off");
 		} else {
-			$(this).text("Sound Off");
+			$("#sound-btn").text("Sound On");
 		}
 	}
 
 	function init() {
+		var index = 0;
+		var topicStorage = JSON.parse(localStorage.getItem("currentIndex"));
+		if (topicStorage) {
+			index = topicStorage[topicId] || 0;
+		}
+		currentIndex = parseInt(index);
 		displayWord();
 	}
 
@@ -100,6 +133,7 @@ $(document).ready(function () {
 	}
 
 	$("#terminal").on("keydown", function (e) {
+		startTimer();
 		if (e.shiftKey && e.keyCode == 13) {
 			// Shift + Enter key pressed
 			var textareaText = $(this).val();
@@ -138,8 +172,6 @@ $(document).ready(function () {
 					},
 					// Prevent the default action of the Enter key (i.e., adding a new line)
 				});
-			} else {
-				displayWord();
 			}
 		}
 	});
@@ -161,6 +193,7 @@ $(document).ready(function () {
 				}
 				displayWord();
 				clearInput();
+				resetTimer();
 				isCommands = true;
 			} else if (line.startsWith("\\next")) {
 				var skipNum = 1;
@@ -174,16 +207,25 @@ $(document).ready(function () {
 				}
 				displayWord();
 				clearInput();
+				resetTimer();
 				isCommands = true;
 			} else if (line.startsWith("\\goto")) {
 				let tokens = line.split(" ");
-				let gotoIndex = parseInt(tokens[1]);
-				if (gotoIndex > 0 && gotoIndex <= vocabularies.length) {
-					currentIndex = gotoIndex - 1;
-					displayWord();
-					clearInput();
-					isCommands = true;
+				if (tokens.length > 1) {
+					let gotoIndex = parseInt(tokens[1]);
+					if (gotoIndex > 0 && gotoIndex <= vocabularies.length) {
+						currentIndex = gotoIndex - 1;
+					}
+				} else {
+					let nextFlagIndex = vocabularies.findIndex((vocabulary, index) => vocabulary.flag === true && index > currentIndex);
+					if (nextFlagIndex !== -1) {
+						currentIndex = nextFlagIndex;
+					}
 				}
+				displayWord();
+				clearInput();
+				isCommands = true;
+				resetTimer();
 			} else if (line.startsWith("\\sound --off")) {
 				soundOn = false;
 				displayWord();
@@ -194,17 +236,32 @@ $(document).ready(function () {
 				displayWord();
 				clearInput();
 				isCommands = true;
+			} else if (line.startsWith("\\flag")) {
+				let tokens = line.split(" ");
+				if (tokens.length > 1) {
+					if (tokens[1] === "--on") {
+						vocabularies[currentIndex].flag = true;
+					} else if (tokens[1] === "--off") {
+						vocabularies[currentIndex].flag = false;
+					}
+				} else {
+					vocabularies[currentIndex].flag = !vocabularies[currentIndex].flag;
+				}
+				displayWord();
+				clearInput();
+				isCommands = true;
+			} else if (line.startsWith("\\mode")) {
+				mode = (mode + 1) % 2;
+				displayWord();
+				clearInput();
+				isCommands = true;
+			} else if (line.startsWith("\\pause")) {
+				pauseTimer();
+				clearInput();
+				isCommands = true;
 			} else if (line.startsWith("\\review")) {
 				// Lấy đường dẫn hiện tại của URL
-				var path = window.location.pathname;
-
-				// Tách đường dẫn thành các phần bằng dấu "/"
-				var paths = path.split("/").filter(function (path) {
-					return path !== "";
-				});
-
-				// Lấy phần tử cuối cùng trong mảng parts, đó chính là số 2
-				var number = paths[paths.length - 1];
+				var number = topicId;
 
 				// Kiểm tra xem number có phải là số hay không
 				if (!isNaN(number)) {
@@ -227,7 +284,7 @@ $(document).ready(function () {
 					url.searchParams.set("from", fromIndex);
 					url.searchParams.set("to", toIndex);
 					// Chuyển hướng đến URL mới
-					window.location.href = url.toString();
+					window.open(url.toString(), "_blank");
 				} else {
 					// Không tìm thấy số trên URL
 					console.log("Number not found in URL");
@@ -239,5 +296,77 @@ $(document).ready(function () {
 			}
 		}
 		return isCommands;
+	}
+
+	function startTimer() {
+		if (timer) {
+			return;
+		}
+
+		if (pausedTime) {
+			continueTimer();
+			return;
+		}
+		startTime = new Date().getTime();
+		timer = setInterval(updateTimer, 10);
+	}
+
+	function updateTimer() {
+		let currentTime = new Date().getTime();
+		let timeElapsed = currentTime - startTime;
+
+		let hours = Math.floor(timeElapsed / (1000 * 60 * 60));
+		let minutes = Math.floor((timeElapsed % (1000 * 60 * 60)) / (1000 * 60));
+		let seconds = Math.floor((timeElapsed % (1000 * 60)) / 1000);
+
+		hours = hours < 10 ? "0" + hours : hours;
+		minutes = minutes < 10 ? "0" + minutes : minutes;
+		seconds = seconds < 10 ? "0" + seconds : seconds;
+
+		let milliseconds = timeElapsed % 1000;
+
+		if (milliseconds < 10) {
+			milliseconds = "000" + milliseconds;
+		} else if (milliseconds < 100) {
+			milliseconds = "00" + milliseconds;
+		} else if (milliseconds < 1000) {
+			milliseconds = "0" + milliseconds;
+		}
+
+		$("#timer").text(`${hours}:${minutes}:${seconds}:${milliseconds}`);
+		if (minutes < 1 || (minutes < 2 && seconds < 30)) {
+			$("#timer").css("background-color", colors.lightGreen).css("color", colors.darkGreen);
+		} else if (minutes < 3) {
+			$("#timer").css("background-color", colors.lightYellow).css("color", colors.darkYellow);
+		} else if (minutes >= 3) {
+			$("#timer").css("background-color", colors.lightPink).css("color", colors.darkRed);
+		}
+	}
+
+	function stopTimer() {
+		clearInterval(timer);
+	}
+
+	function resetTimer() {
+		stopTimer();
+		timer = null;
+		$("#timer").text("00:00:00:0000");
+		$("#timer").css("background-color", colors.lightGreen).css("color", colors.darkGreen);
+	}
+
+	function pauseTimer() {
+		if (timer) {
+			clearInterval(timer);
+			timer = null;
+			pausedTime = new Date().getTime();
+		}
+	}
+
+	function continueTimer() {
+		if (!timer && pausedTime) {
+			startTime += new Date().getTime() - pausedTime;
+			timer = setInterval(updateTimer, 10);
+			pausedTime = null;
+		}
 	}
 });

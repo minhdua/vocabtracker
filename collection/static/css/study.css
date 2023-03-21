@@ -49,3 +49,7 @@ tr:nth-child(even) {
 #total-correct {
 	color: #5cb85c;
 }
+
+th i.fa-bookmark {
+	color: green;
+}
