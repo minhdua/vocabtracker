@@ -32,11 +32,13 @@ class Vocabulary(models.Model):
         max_length=255), blank=True, null=True, default=list)
     antonyms = ArrayField(models.CharField(
         max_length=255), blank=True, null=True, default=list)
+    image_url = models.CharField(max_length=2000, null=True, blank=True)
     topic = models.ForeignKey(
         Topic, on_delete=models.CASCADE, related_name='vocabulary')
     flag = models.BooleanField(default=True)
     uncheck_ifnull = models.BooleanField(default=False)
-    # study_time = 
+
+    # study_time =
 
 
 class Question(models.Model):

@@ -53,3 +53,21 @@ tr:nth-child(even) {
 th i.fa-bookmark {
 	color: green;
 }
+
+#word {
+	font-size: 16pt;
+	font-weight: bold;
+	color: #5cb85c;
+}
+
+/* #vocab-table td {
+	vertical-align: top;
+	padding: 10px;
+	border: 1px solid #ddd;
+} */
+img,
+svg {
+	vertical-align: middle;
+	width: 300px !important;
+	height: 150px !important;
+}

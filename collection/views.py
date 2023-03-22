@@ -26,7 +26,7 @@ def index(request):
 
 def vocab_list(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    vocabularies = Vocabulary.objects.filter(topic=topic).values()
+    vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
     if request.method == 'POST':
         formset = VocabularyFormSet(request.POST)
         if formset.is_valid():
@@ -45,12 +45,14 @@ def vocab_list(request, topic_id):
                             Vocabulary, id=cleaned_data['id'])
                         vocabulary.word = cleaned_data['word']
                         vocabulary.pronunciation = cleaned_data['pronunciation']
+                        vocabulary.image_url = cleaned_data['image_url']
                         vocabulary.meaning = cleaned_data['meaning']
                         vocabulary.save()
                     else:
                         Vocabulary.objects.create(
                             word=cleaned_data['word'],
                             pronunciation=cleaned_data['pronunciation'],
+                            image_url = cleaned_data['image_url'],
                             meaning=cleaned_data['meaning'],
                             topic=topic,
                         )
@@ -82,11 +84,16 @@ def add_topic(request):
 # get study.html
 
 
-def study(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
-    vocabulary_list = list(vocabularies)
-    return render(request, 'study.html', {'vocabularies': vocabulary_list})
+def study(request):
+    if request.method == 'POST':
+        topic_ids = json.loads(request.POST.get('topic_ids'))
+        vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+
+        vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+        return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
+    else:
+        return render(request, 'study.html')
+
 
 def handle_typing(request):
      if request.method == "POST":

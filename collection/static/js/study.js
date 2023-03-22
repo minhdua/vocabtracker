@@ -2,7 +2,7 @@ import { speech } from "./sound.js";
 import "./ajax-settings.js";
 import colors from "./const.js";
 $(document).ready(function () {
-	var vocabularies = JSON.parse($("#vocabularies-data").val());
+	var vocabularies = [];
 
 	var soundOn = true;
 	var currentIndex = 0;
@@ -12,13 +12,6 @@ $(document).ready(function () {
 	var path = window.location.pathname;
 	var mode = 0; //normal
 	var pausedTime = null;
-	// Tách đường dẫn thành các phần bằng dấu "/"
-	var paths = path.split("/").filter(function (path) {
-		return path !== "";
-	});
-
-	// Lấy phần tử cuối cùng trong mảng parts, đó chính là số 2
-	var topicId = paths[paths.length - 1];
 
 	function updateAttemptsTotal() {
 		var attempts_total = 0;
@@ -31,35 +24,32 @@ $(document).ready(function () {
 			checks_total += v.checks_total;
 			check_correct += v.checks_correct;
 		}
-		$("#total-checks").text(`${check_correct}/ ${checks_total}`);
-		$("#total-correct").text(`${attempts_correct}/ ${attempts_total}`);
+		$("#total-checks").text(`${check_correct}/${checks_total}`);
+		$("#total-correct").text(`${attempts_correct}/${attempts_total}`);
 	}
 	init();
 	function getCurrentWord() {
 		return vocabularies[currentIndex];
 	}
 	function displayWord() {
+		if (!vocabularies || vocabularies.length === 0) {
+			return;
+		}
 		var currentWord = getCurrentWord();
-		$("#no").text(currentIndex + 1);
 		if (mode === 0) $("#word").text(currentWord.word);
 		else $("#word").text("");
 		$("#meaning").text(currentWord.meaning);
 		$("#pronunciation").text(currentWord.pronunciation);
+		$("#image img").attr("src", currentWord.image_url || "/static/images/default-image.png");
 		$("#correct-attempts").text(`${currentWord.attempts_correct || 0}/${currentWord.attempts_total || 0}`);
 		$("#correct-checks").text(`${currentWord.checks_correct || 0}/${currentWord.checks_total || 0}`);
 		$("#total-word").text(vocabularies.length);
+		$("#total-word").text(`${(currentIndex || 0) + 1}/${vocabularies.length || 0}`);
 		if (soundOn) {
 			speech(currentWord.word);
 		}
 		checkOnOffButton();
 		updateAttemptsTotal();
-
-		var topicStorage = JSON.parse(localStorage.getItem("currentIndex"));
-		if (!topicStorage) {
-			topicStorage = new Object();
-		}
-		topicStorage[topicId] = currentIndex;
-		localStorage.setItem("currentIndex", JSON.stringify(topicStorage));
 		if (currentWord.flag) {
 			$("th i.fa-bookmark").removeAttr("hidden", true);
 		} else {
@@ -87,12 +77,15 @@ $(document).ready(function () {
 	}
 
 	function init() {
+		vocabularies = JSON.parse(localStorage.getItem("vocabularies"));
 		var index = 0;
-		var topicStorage = JSON.parse(localStorage.getItem("currentIndex"));
-		if (topicStorage) {
-			index = topicStorage[topicId] || 0;
+		for (var v of vocabularies) {
+			if (v.flag) {
+				currentIndex = index;
+				break;
+			}
+			index++;
 		}
-		currentIndex = parseInt(index);
 		displayWord();
 	}
 

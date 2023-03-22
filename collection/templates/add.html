@@ -3,47 +3,38 @@
 {% endblock %} {% block content %}
 <h1>Add Vocabulary</h1>
 <form method="post">
-  <button id="save-table" class="btn btn-primary" type="submit">Save</button>
-  {% csrf_token %} {{ formset.management_form }}
-  <table id="vocab-table" class="table table-bordered border-primary">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Từ gốc</th>
-        <th scope="col">Phiên âm</th>
-        <th scope="col">Nghĩa</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for form in formset %} {% with index=forloop.counter %}
-      <tr>
-        <th class="index">{{ index }}</th>
-        <td>{{ form.word }}</td>
-        <td>{{ form.pronunciation }}</td>
-        <td>{{ form.meaning }}</td>
-        <td>
-          {% if form.id.value %}
-          <input
-            type="hidden"
-            name="{{ form.prefix }}-id"
-            value="{{ form.id.value }}"
-          />
-          {% endif %}
-          <i class="fa fa-times remove-row"></i>
-        </td>
-      </tr>
-      {% endwith %} {% endfor %}
-    </tbody>
-  </table>
-  <button
-    id="add-row"
-    class="btn btn-primary"
-    type="button"
-    data-formset="{{ formset.prefix }}"
-  >
-    Add
-  </button>
+	<button id="save-table" class="btn btn-primary" type="submit">Save</button>
+	{% csrf_token %} {{ formset.management_form }}
+	<table id="vocab-table" class="table table-bordered border-primary">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Từ gốc</th>
+				<th scope="col">Phiên âm</th>
+				<th scope="col">Nghĩa</th>
+				<th scope="col">Hình ảnh</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for form in formset %} {% with index=forloop.counter %}
+			<tr>
+				<th class="index">{{ index }}</th>
+				<td>{{ form.word }}</td>
+				<td>{{ form.pronunciation }}</td>
+				<td>{{ form.meaning }}</td>
+				<td>{{ form.image_url }}</td>
+				<td>
+					{% if form.id.value %}
+					<input type="hidden" name="{{ form.prefix }}-id" value="{{ form.id.value }}" />
+					{% endif %}
+					<i class="fa fa-times remove-row"></i>
+				</td>
+			</tr>
+			{% endwith %} {% endfor %}
+		</tbody>
+	</table>
+	<button id="add-row" class="btn btn-primary" type="button" data-formset="{{ formset.prefix }}">Add</button>
 </form>
 {% endblock %} {% block javascript %}
 <script src="{% static 'js/add.js' %}"></script>

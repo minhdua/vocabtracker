@@ -13,6 +13,7 @@ $(document).ready(function () {
       <td><input type="text" name="form-0-word" required></td>
       <td><input type="text" name="form-0-pronunciation"></td>
       <td><input type="text" name="form-0-meaning" required></td>
+	  <td><input type="text" name="form-0-image_url"></td>
       <td><i class="fa fa-times remove-row"></i></td>
    </tr>`;
 		return $(row);
@@ -63,6 +64,10 @@ $(document).ready(function () {
 					.find("input[type='text'][name$='-meaning']")
 					.attr("name", "form-" + index + "-meaning")
 					.attr("id", "id_form-" + index + "-meaning");
+				$(this)
+					.find("input[type='text'][name$='-image_url']")
+					.attr("name", "form-" + index + "-image_url")
+					.attr("id", "id_form-" + index + "-image_url");
 			});
 			var rows = document.querySelectorAll("#vocab-table tbody tr");
 			var numRows = rows.length;

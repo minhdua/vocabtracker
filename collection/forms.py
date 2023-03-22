@@ -10,7 +10,7 @@ class VocabularyForm(forms.ModelForm):
 
     class Meta:
         model = Vocabulary
-        fields = ['id', 'word', 'pronunciation', 'meaning']
+        fields = ['id', 'word', 'pronunciation', 'meaning', 'image_url']
 
 
 class TopicForm(forms.ModelForm):

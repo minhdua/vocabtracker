@@ -11,32 +11,44 @@
 	<table id="vocab-table">
 		<thead>
 			<tr>
-				<th>No.</th>
 				<th id="header-word">Word <i class="fa fa-bookmark" aria-hidden="true"></i></th>
 				<th>Pronunciation</th>
 				<th>Meaning</th>
-				<th>Correct Attempts</th>
-				<th>Total Checks</th>
+				<th>Part of Speech</th>
+				<th>Note</th>
 			</tr>
 		</thead>
 		<tbody>
 			<!-- Placeholder rows for data -->
 			<tr>
-				<td id="no"></td>
 				<td id="word"></td>
 				<td id="pronunciation"></td>
 				<td id="meaning"></td>
-				<td id="correct-attempts"></td>
-				<td id="correct-checks"></td>
+				<td id="part-of-speech"></td>
+				<td id="note"></td>
 			</tr>
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="4" id="total-word"></td>
+				<td colspan="3" id="total-word"></td>
 				<td id="total-correct">0</td>
 				<td id="total-checks">0</td>
 			</tr>
 		</tfoot>
+		<thead>
+			<th colspan="3">Image</th>
+			<th>Correct Attempts</th>
+			<th>Total Checks</th>
+		</thead>
+		<tbody>
+			<td colspan="3">
+				<div id="image">
+					<img src="{% static 'images/default-image.png' %}" alt="Word Image" />
+				</div>
+			</td>
+			<td id="correct-attempts"></td>
+			<td id="correct-checks"></td>
+		</tbody>
 	</table>
 	<div id="incorrect-last" hidden style="backgroundcolor: #f8d7da; color: #721c24; padding: 1rem; border: 1px solid #f5c6cb; borderradius: 0.25rem">
 		A wild error has appeared!
@@ -66,7 +78,7 @@
 		<p id="message"></p>
 	</div>
 </div>
-<input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" />
+<!-- <input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" /> -->
 <p>Lệnh <code>\pre</code>: Di chuyển ngược lại từ trước đó.</p>
 <p>Cú pháp: <code>\pre [number]</code></p>
 <p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ đầu tiên trong danh sách, nó sẽ dừng lại ở từ đầu tiên.</p>

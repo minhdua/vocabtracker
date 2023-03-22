@@ -1,75 +1,38 @@
+import "./ajax-settings.js";
 $(document).ready(function () {
 	// Lấy thẻ modal và nút mở modal
 	var modal = $("#add-topic-modal");
-	var btn = $("#add-topic-btn");
-
-	// Lấy các phần tử trong form và các nút trong modal
-	var form = modal.find("#add-topic-form");
-	var title = form.find("#add-topic-title");
-	var description = form.find("#add-topic-description");
-	var imageUrl = form.find("#add-topic-image-url");
-	var saveBtn = modal.find("#add-topic-save");
+	var addBtn = $("#add-topic-btn");
+	var studyBtn = $("#study-topic-btn");
 
 	// Hiển thị modal khi click vào nút Add
-	btn.click(function () {
+	addBtn.click(function () {
 		modal.modal("show");
 	});
 
-	// Xử lý khi click vào nút Save
-	// saveBtn.click(function () {
-	// 	// Lấy giá trị trong form
-	// 	var newTitle = title.val();
-	// 	var newDescription = description.val();
-	// 	var newImageUrl = imageUrl[0].files[0];
-
-	// 	// Kiểm tra giá trị nhập vào có hợp lệ không
-	// 	if (newTitle == "" || newDescription == "") {
-	// 		alert("Please enter valid values");
-	// 		return;
-	// 	}
-
-	// 	// Tạo đối tượng FormData để chứa dữ liệu gửi lên
-	// 	var formData = new FormData();
-	// 	formData.append("title", newTitle);
-	// 	formData.append("description", newDescription);
-	// 	formData.append("image", newImageUrl);
-	// 	formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
-
-	// 	$.ajax({
-	// 		type: "POST",
-	// 		url: "{% url 'add_topic' %}",
-	// 		data: data,
-	// 		success: function (response) {
-	// 			if (response.status == "success") {
-	// 				// Thêm topic mới vào danh sách và đóng modal dialog
-	// 				var newTopicHtml =
-	// 					'<div class="col">' +
-	// 					'<div class="card">' +
-	// 					'<img src="' +
-	// 					newImageUrl +
-	// 					'" class="card-img-top" alt="...">' +
-	// 					'<div class="card-body">' +
-	// 					'<h5 class="card-title">' +
-	// 					newTitle +
-	// 					"</h5>" +
-	// 					'<p class="card-text">' +
-	// 					newDescription +
-	// 					"</p>" +
-	// 					'<a href="#" class="btn btn-primary">Learn More</a>' +
-	// 					"</div>" +
-	// 					"</div>" +
-	// 					"</div>";
-
-	// 				var row = $(".row-cols-md-4");
-	// 				row.append(newTopicHtml);
-	// 				modal.modal("hide");
-	// 			} else {
-	// 				alert("Failed to add new topic");
-	// 			}
-	// 		},
-	// 		error: function (xhr, status, error) {
-	// 			alert("Failed to add new topic: " + error);
-	// 		},
-	// 	});
-	// });
+	studyBtn.click(function () {
+		var topic_ids = [];
+		$("input[name='topic-choice']:checked").each(function () {
+			// Access the value or other attributes of each checked checkbox
+			// var checkboxValue = $(this).val();
+			topic_ids.push($(this).attr("id"));
+			// ... do something with the values ...
+		});
+		$.ajax({
+			url: "/study/", // Địa chỉ URL của API của bạn
+			method: "POST", // Phương thức của yêu cầu
+			data: { topic_ids: JSON.stringify(topic_ids) }, // Dữ liệu gửi lên máy chủ
+			success: function (data) {
+				// save vào local storage
+				localStorage.setItem("vocabularies", JSON.stringify(data["vocabularies"]));
+				window.location.href = "/study/";
+			},
+			error: function (xhr, status, error) {
+				// Xử lý lỗi nếu có
+				console.error(error);
+				// clearInput();
+			},
+			// Prevent the default action of the Enter key (i.e., adding a new line)
+		});
+	});
 });
