@@ -3,27 +3,10 @@
 {% endblock %} {% block content %}
 
 <form action="#" method="post">
-	{% csrf_token %} {% for question in questions %}
-	<div class="question" id="question-{{forloop.counter}}" style="background-color: #f5f5f5; padding: 20px; border: 1px solid #cccccc; border-radius: 4px; font-size: 16px">
-		<p style="margin-bottom: 5px">{{forloop.counter}}. {{ question.question }}</p>
-		<label style="margin-right: 10px">
-			{% for answer in question.distractors %}
-			<div class="answer">
-				<input type="radio" id="answer{{ forloop.parentloop.counter }}_{{ forloop.counter }}" name="answer{{ forloop.parentloop.counter }}" value="{{ answer }}" />
-				{{ answer }}
-			</div>
-			{% endfor %}
-			<input type="checkbox" name="flag" {% if question.flag %}checked{% endif %} />
-			<label for="flag">Đánh dấu</label>
-			<input type="checkbox" name="uncheckifnull" {% if question.uncheck_ifnull %}checked{% endif %} />
-			<label for="uncheckifnull">Không chấm nếu không chọn</label>
-			<input type="hidden" name="correct_answer" value="{{ question.correct_answer }}" />
-			<input type="hidden" name="word_check" value="{{ question.word }}" />
-			<input type="hidden" name="word_id" value="{{ question.word_id }}" />
-		</label>
+	{% csrf_token %}
+	<div id="questions">
+		<!-- <input type="submit" value="Trả lời" /> -->
 	</div>
-	{% endfor %}
-	<!-- <input type="submit" value="Trả lời" /> -->
 	<input id="submit" type="button" value="Trả lời" />
 </form>
 

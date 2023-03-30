@@ -1,8 +1,9 @@
+import base64
 import json
 from random import shuffle
 import random
 import re
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.forms import formset_factory, model_to_dict
 
@@ -118,42 +119,62 @@ def handle_typing(request):
         vocabulary_dict['incorect_word_last'] = incorrect_words
         # Trả về response là một đối tượng JSON
         return JsonResponse(vocabulary_dict)
-     
-def review(request, topic_id):
-    from_word = int(request.GET.get('from'))
-    to_word = int(request.GET.get('to'))
-    topic = get_object_or_404(Topic, id=topic_id)
-    vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
-    vocabularies = list(vocabularies[from_word:to_word+1])
 
-    questions = []
-    for vocab in vocabularies:
-        noise_words = [w for w in vocabularies if w['id'] != vocab['id']]
-        noise_words = list(noise_words)
-        shuffle(noise_words)
-        # mode = random.choice(TEST_MODE_CHOICES)
-        mode = ('meaning','')
-        correct_answer = vocab['word']
-        question_text = ''
-        if mode[0] == 'meaning' :
-            question_text = 'Meaning of "' + vocab['word'] +'" :'
-            correct_answer = vocab['meaning']
-            answers = [noise_words[0]['meaning'], noise_words[1]['meaning'], noise_words[2]['meaning'], vocab['meaning']]
-        
-        shuffle(answers)
-        question = {
-        'word_id': vocab['id'],
-        'word': vocab['word'] ,
-        'question':question_text,
-        'correct_answer': correct_answer,
-        'distractors': answers,
-        'flag':vocab['flag'],
-        'uncheck_ifnull':vocab['uncheck_ifnull']
-        }
-        questions.append(question)
-    shuffle(questions)
-        
-    return render(request, 'review.html', {'questions': questions})
+def pronunciation_or_word(words):
+    words_convert= []
+    for word in words:
+        if word.pronunciation:
+            words_convert.append(word.pronunciation)
+        else:
+            words_convert.append(word.word)
+    return words_convert
+
+def review(request):
+    if request.method == 'POST':
+        topic_ids = json.loads(request.POST.get('topic_ids'))
+        vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+        from_word = int(request.POST.get('from', 0))
+        to_word = int(request.POST.get('to', len(vocabularies)))
+        vocabularies = list(vocabularies[from_word:to_word+1])
+        questions = []
+        for vocab in vocabularies:
+            noise_words = [w for w in vocabularies if w.id != vocab.id]
+            noise_words = list(noise_words)
+            shuffle(noise_words)
+            # mode = random.choice(TEST_MODE_CHOICES)
+            mode = ('word','')
+            correct_answer = vocab.word
+            question_text = ''
+            if mode[0] == 'meaning' :                                               
+                question_text = 'Meaning of "' + vocab.word +'" :'
+                correct_answer = vocab.meaning
+                answers = [noise_words[0].meaning, noise_words[1].meaning, noise_words[2].meaning, vocab.meaning]
+            elif mode[0] == 'pronunciation':
+                question_text = 'Pronunciation of "' + vocab.word +'" :'
+                correct_answer = vocab.pronunciation
+                answers = [a for a in answers if a.pronunciation]
+                answers = [noise_words[0].pronunciation, noise_words[1].pronunciation, noise_words[2].pronunciation, vocab.pronunciation]
+            elif mode[0] == 'word':
+                question_text = 'Word of "' + vocab.meaning +'" :'
+                correct_answer = vocab.word
+                answers = [noise_words[0].word, noise_words[1].word, noise_words[2].word, vocab.word]
+            
+            shuffle(answers)
+            question = {
+                'word_id': vocab.id,
+                'word': vocab.word,
+                'question':question_text,
+                'correct_answer': correct_answer,
+                'distractors': answers,
+                'flag':vocab.flag,
+                'uncheck_ifnull':vocab.uncheck_ifnull,
+            }
+            questions.append(question)
+        shuffle(questions)
+        # vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+        return JsonResponse({'questions': questions}, safe=False)
+    else:
+        return render(request, 'review.html')
 
 def handle_review(request):
     if request.method == "POST":
@@ -177,4 +198,15 @@ def handle_review(request):
                 word.checks_incorrect.append(question['answer'])
             word.save()
         # Trả về response là một đối tượng JSON
-        return JsonResponse("Success")
+        return JsonResponse({'success': True})
+    
+def my_pdf_view(request):
+    # Open the PDF file
+    with open('C:/Users/MinhDua/Downloads/Toiec.pdf', 'rb') as f:
+        pdf_data = f.read()
+
+    # Encode the PDF data as base64
+    encoded_pdf = base64.b64encode(pdf_data).decode('utf-8')
+
+    # Return the response as base64-encoded string
+    return HttpResponse(encoded_pdf)

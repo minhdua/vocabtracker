@@ -363,4 +363,15 @@ $(document).ready(function () {
 			pausedTime = null;
 		}
 	}
+
+	$.get(
+		"/my_pdf_view/",
+		function (data) {
+			// Success callback function
+			// 'data' variable contains the PDF file
+			// Insert the PDF file into an <embed> element
+			$("embed").attr("src", "data:application/pdf;base64," + data);
+		},
+		"base64"
+	);
 });
