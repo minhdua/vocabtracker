@@ -3,3 +3,4 @@ django==4.1.7
 django-sass-processor==1.2.2
 psycopg2==2.9.5
 Pillow==9.4.0
+python-Levenshtein==0.20.9

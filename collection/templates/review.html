@@ -7,9 +7,10 @@
 	<div id="questions">
 		<!-- <input type="submit" value="Trả lời" /> -->
 	</div>
+
 	<input id="submit" type="button" value="Trả lời" />
 </form>
-
+<input type="hidden" id="questions-data" value="{{ questions|jsonify }}" />
 {% endblock %} {% block javascript %}
 <script type="module" src="{% static 'js/review.js' %}"></script>
 {% endblock %}

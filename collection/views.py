@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.forms import formset_factory, model_to_dict
 
+from Levenshtein import distance
+
 from .enums import TEST_MODE_CHOICES
 from .forms import TopicForm, VocabularyForm
 from .models import Topic, Vocabulary
@@ -86,14 +88,11 @@ def add_topic(request):
 
 
 def study(request):
-    if request.method == 'POST':
-        topic_ids = json.loads(request.POST.get('topic_ids'))
-        vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
-
-        vocabulary_dict =[model_to_dict(v) for v in vocabularies]
-        return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
-    else:
-        return render(request, 'study.html')
+    topic_ids = request.GET.getlist('topic_id')
+    vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+    vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+    # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
+    return render(request, 'study.html', {'vocabularies': vocabulary_dict})
 
 
 def handle_typing(request):
@@ -129,52 +128,62 @@ def pronunciation_or_word(words):
             words_convert.append(word.word)
     return words_convert
 
+def find_most_similar_words(word, word_list):
+    distances = [(w, distance(word.word, w.word)) for w in word_list]
+    sorted_distances = sorted(distances, key=lambda x: x[1])
+    return [w[0] for w in sorted_distances[:3]]
+
 def review(request):
-    if request.method == 'POST':
-        topic_ids = json.loads(request.POST.get('topic_ids'))
-        vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
-        from_word = int(request.POST.get('from', 0))
-        to_word = int(request.POST.get('to', len(vocabularies)))
-        vocabularies = list(vocabularies[from_word:to_word+1])
-        questions = []
-        for vocab in vocabularies:
-            noise_words = [w for w in vocabularies if w.id != vocab.id]
-            noise_words = list(noise_words)
-            shuffle(noise_words)
-            # mode = random.choice(TEST_MODE_CHOICES)
-            mode = ('word','')
+   
+    topic_ids = request.GET.getlist('topic_id') 
+    vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+    from_word = int(request.POST.get('from', 0))
+    to_word = int(request.POST.get('to', len(vocabularies)))
+    vocabularies = list(vocabularies[from_word:to_word+1])
+    questions = []
+    for vocab in vocabularies:
+        seen_words = set()
+        noise_words = []
+        for w in vocabularies:
+            if w.id != vocab.id and w.word not in seen_words:
+                noise_words.append(w)
+                seen_words.add(w.word)
+        noise_words = find_most_similar_words(vocab,list(noise_words))
+        shuffle(noise_words)
+        # mode = random.choice(TEST_MODE_CHOICES)
+        mode = ('word','')
+        correct_answer = vocab.word
+        question_text = ''
+        if mode[0] == 'meaning' :                                               
+            question_text = 'Meaning of "' + vocab.word +'" :'
+            correct_answer = vocab.meaning
+            answers = [noise_words[0].meaning, noise_words[1].meaning, noise_words[2].meaning, vocab.meaning]
+        elif mode[0] == 'pronunciation':
+            question_text = 'Pronunciation of "' + vocab.word +'" :'
+            correct_answer = vocab.pronunciation
+            answers = [a for a in answers if a.pronunciation]
+            answers = [noise_words[0].pronunciation, noise_words[1].pronunciation, noise_words[2].pronunciation, vocab.pronunciation]
+        elif mode[0] == 'word':
+            question_text = 'Word of "' + vocab.meaning +'" :'
             correct_answer = vocab.word
-            question_text = ''
-            if mode[0] == 'meaning' :                                               
-                question_text = 'Meaning of "' + vocab.word +'" :'
-                correct_answer = vocab.meaning
-                answers = [noise_words[0].meaning, noise_words[1].meaning, noise_words[2].meaning, vocab.meaning]
-            elif mode[0] == 'pronunciation':
-                question_text = 'Pronunciation of "' + vocab.word +'" :'
-                correct_answer = vocab.pronunciation
-                answers = [a for a in answers if a.pronunciation]
-                answers = [noise_words[0].pronunciation, noise_words[1].pronunciation, noise_words[2].pronunciation, vocab.pronunciation]
-            elif mode[0] == 'word':
-                question_text = 'Word of "' + vocab.meaning +'" :'
-                correct_answer = vocab.word
-                answers = [noise_words[0].word, noise_words[1].word, noise_words[2].word, vocab.word]
-            
-            shuffle(answers)
-            question = {
-                'word_id': vocab.id,
-                'word': vocab.word,
-                'question':question_text,
-                'correct_answer': correct_answer,
-                'distractors': answers,
-                'flag':vocab.flag,
-                'uncheck_ifnull':vocab.uncheck_ifnull,
-            }
-            questions.append(question)
-        shuffle(questions)
-        # vocabulary_dict =[model_to_dict(v) for v in vocabularies]
-        return JsonResponse({'questions': questions}, safe=False)
-    else:
-        return render(request, 'review.html')
+            answers = [noise_words[0].word, noise_words[1].word, noise_words[2].word, vocab.word]
+        
+        shuffle(answers)
+        question = {
+            'word_id': vocab.id,
+            'word': vocab.word,
+            'question':question_text,
+            'correct_answer': correct_answer,
+            'distractors': answers,
+            'flag':vocab.flag,
+            'uncheck_ifnull':vocab.uncheck_ifnull,
+            'type': mode[0],
+        }
+        questions.append(question)
+    shuffle(questions)
+    # vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+    return render(request, 'review.html', {'questions': questions}
+)
 
 def handle_review(request):
     if request.method == "POST":

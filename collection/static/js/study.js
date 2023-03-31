@@ -28,9 +28,11 @@ $(document).ready(function () {
 		$("#total-correct").text(`${attempts_correct}/${attempts_total}`);
 	}
 	init();
+
 	function getCurrentWord() {
 		return vocabularies[currentIndex];
 	}
+
 	function displayWord() {
 		if (!vocabularies || vocabularies.length === 0) {
 			return;
@@ -77,14 +79,13 @@ $(document).ready(function () {
 	}
 
 	function init() {
-		vocabularies = JSON.parse(localStorage.getItem("vocabularies"));
-		var index = 0;
-		for (var v of vocabularies) {
-			if (v.flag) {
-				currentIndex = index;
+		vocabularies = JSON.parse($("#vocabularies-data").val());
+		// get first word has flag = true
+		for (var i = 0; i < vocabularies.length; i++) {
+			if (vocabularies[i].flag) {
+				currentIndex = i;
 				break;
 			}
-			index++;
 		}
 		displayWord();
 	}

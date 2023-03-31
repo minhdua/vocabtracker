@@ -24,39 +24,13 @@ $(document).ready(function () {
 
 	studyBtn.click(function () {
 		var topic_ids = getTopics();
-		$.ajax({
-			url: "/study/", // Địa chỉ URL của API của bạn
-			method: "POST", // Phương thức của yêu cầu
-			data: { topic_ids: JSON.stringify(topic_ids) }, // Dữ liệu gửi lên máy chủ
-			success: function (data) {
-				// save vào local storage
-				localStorage.setItem("vocabularies", JSON.stringify(data["vocabularies"]));
-				window.location.href = "/study/";
-			},
-			error: function (xhr, status, error) {
-				// Xử lý lỗi nếu có
-				console.error(error);
-			},
-			// Prevent the default action of the Enter key (i.e., adding a new line)
-		});
+		var queryString = topic_ids.map((id) => `topic_id=${id}`).join("&");
+		window.location.href = `/study/?${queryString}`;
 	});
 
 	$("#review-topic-btn").click(function () {
 		var topic_ids = getTopics();
-		$.ajax({
-			url: "/review/", // Địa chỉ URL của API của bạn
-			method: "POST", // Phương thức của yêu cầu
-			data: { topic_ids: JSON.stringify(topic_ids) }, // Dữ liệu gửi lên máy chủ
-			success: function (data) {
-				// save vào local storage
-				localStorage.setItem("questions", JSON.stringify(data["questions"]));
-				window.location.href = "/review/";
-			},
-			error: function (xhr, status, error) {
-				// Xử lý lỗi nếu có
-				console.error(error);
-			},
-			// Prevent the default action of the Enter key (i.e., adding a new line)
-		});
+		var queryString = topic_ids.map((id) => `topic_id=${id}`).join("&");
+		window.location.href = `/review/?${queryString}`;
 	});
 });

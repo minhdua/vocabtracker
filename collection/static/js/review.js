@@ -1,20 +1,13 @@
 import { speech } from "./sound.js";
 import "./ajax-settings.js";
 $(document).ready(function () {
-	var questions = JSON.parse(localStorage.getItem("questions"));
-	function shuffleArray(array) {
-		for (let i = array.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[array[i], array[j]] = [array[j], array[i]];
-		}
-		return array;
-	}
+	var questions = [];
 	init();
-	function init() {
+
+	function showQuestion() {
 		var html = "";
 		if (Array.isArray(questions) && questions.length > 0) {
 			var index = 0;
-			questions = shuffleArray(questions);
 			questions.forEach(function (question) {
 				html += `
 					<div class="question" id="question-${index}" "background-color: #f5f5f5; padding: 20px; border: 1px solid #cccccc; border-radius: 4px; font-size: 16px">
@@ -26,14 +19,21 @@ $(document).ready(function () {
 				var answer = "";
 				var answerIndex = 0;
 				question.distractors.forEach(function (distractor) {
-					answer += `
+					if (question.type == "word") {
+						answer += `
+						<input type="radio" name="answer-${index}" id="answer${index}-${answerIndex}" value="${distractor}">
+						<label for="answer${index}-${answerIndex}"><a href="#" class="phonetic">${distractor}</a></label>
+						`;
+					} else {
+						answer += `
 						<input type="radio" name="answer-${index}" id="answer${index}-${answerIndex}" value="${distractor}">
 						<label for="answer${index}-${answerIndex}">${distractor}</label>
 						`;
+					}
 					answerIndex++;
 				});
 				html += `
-						<p style="margin-bottom: 5px">${index}. ${question.question}</p>
+						<p style="margin-bottom: 5px">${index + 1}. ${question.question}</p>
 						<label style="margin-right: 10px">
 							<div class="answer">
 								${answer}
@@ -49,19 +49,31 @@ $(document).ready(function () {
 				index++;
 			});
 			$("#questions").html(html);
+			$(".phonetic").on("click", function (e) {
+				e.preventDefault();
+				speech($(this).text());
+			});
 		} else {
 			console.log("questions is not an array or contains no elements");
 		}
 	}
 
-	$(".question").click(function (e) {
-		if ($(e.target).is(".child")) {
-			e.stopPropagation();
-			return;
-		}
-		var word = $(this).find("input[name='word_check']").val();
-		speech(word);
-	});
+	function init() {
+		questions = JSON.parse($("#questions-data").val());
+		questions = questions.filter(function (question) {
+			return question.uncheck_ifnull == false;
+		});
+		showQuestion();
+	}
+
+	// $(".question").click(function (e) {
+	// 	if ($(e.target).is(".child")) {
+	// 		e.stopPropagation();
+	// 		return;
+	// 	}
+	// 	var word = $(this).find("input[name='word_check']").val();
+	// 	speech(word);
+	// });
 
 	$("#submit").click(function () {
 		//disable all radio

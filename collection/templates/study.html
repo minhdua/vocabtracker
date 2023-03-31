@@ -3,7 +3,7 @@
 {% endblock %} {% block content %}
 <div class="container">
 	<h1>Vocabulary</h1>
-	<embed src="{% static 'pdfs/Toiec.pdf' %}" type="application/pdf" width="100%" height="600px" />
+	<!-- <embed src="{% static 'pdfs/Toiec.pdf' %}" type="application/pdf" width="100%" height="600px" /> -->
 	<div class="navigation">
 		<button id="prev-btn" disabled>&lt; Previous</button>
 		<button id="sound-btn">Sound On</button>
@@ -79,7 +79,7 @@
 		<p id="message"></p>
 	</div>
 </div>
-<!-- <input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" /> -->
+<input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" />
 <p>Lệnh <code>\pre</code>: Di chuyển ngược lại từ trước đó.</p>
 <p>Cú pháp: <code>\pre [number]</code></p>
 <p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ đầu tiên trong danh sách, nó sẽ dừng lại ở từ đầu tiên.</p>
