@@ -14,9 +14,10 @@ class VocabularyForm(forms.ModelForm):
 
 
 class TopicForm(forms.ModelForm):
+    id = forms.IntegerField(widget=forms.HiddenInput())
     class Meta:
         model = Topic
-        fields = ('name', 'description', 'image_url')
+        fields = ('id', 'name', 'description', 'image_url')
         # Optional widget to display image thumbnail and allow clearing of image
         widgets = {'image_url': forms.ClearableFileInput()}
         labels = {'image_url': 'Image'}  # Optional label for the image field

@@ -1,4 +1,39 @@
 $(document).ready(function () {
+	var btnImportExcel = $("#import-excel");
+	var btnImportJson = $("#import-json");
+	var btnImportJsonModal = $("#import-json-button");
+
+	btnImportJson.click(function () {
+		//clear textarea
+		$("#json-textarea").val("");
+		$("#import-json-modal").modal("show");
+	});
+
+	btnImportJsonModal.click(function () {
+		var json = JSON.parse($("#json-textarea").val());
+		// add row from json on ui
+		for (var i = 0; i < json.length; i++) {
+			// get last row if it is null or empty else create new row
+			var lastRow = $("table#vocab-table tbody tr:last");
+			var word = lastRow.find("input[name$='-word']").val();
+			var pronunciation = lastRow.find("input[name$='-pronunciation']").val();
+			var meaning = lastRow.find("input[name$='-meaning']").val();
+			var image_url = lastRow.find("input[name$='-image_url']").val();
+			if (word !== "" || pronunciation !== "" || meaning !== "" || image_url !== "") {
+				addNewRow();
+				// reget last row
+				lastRow = $("table#vocab-table tbody tr:last");
+			}
+			// update last row
+			lastRow.find("input[name$='-word']").val(json[i].word);
+			lastRow.find("input[name$='-pronunciation']").val(json[i].pronunciation);
+			lastRow.find("input[name$='-meaning']").val(json[i].meaning);
+			lastRow.find("input[name$='-image_url']").val(json[i].image_url);
+		}
+		// close modal
+		$("#import-json-modal").modal("hide");
+	});
+
 	function getNextIndex() {
 		let index = $("table#vocab-table tbody tr:last th").text() || 0;
 		console.log("getNextIndex", index);
@@ -80,6 +115,13 @@ $(document).ready(function () {
 		if (rows.length < 1) {
 			addNewRow();
 		}
+		// set url for column image_url
+		$("table#vocab-table tbody tr").each(function (index) {
+			var image_url = $(this).find("input[name$='-image_url']").val();
+			if (image_url !== "") {
+				$(this).find("input[name$='-image_url']").after(`<img src="${image_url}" alt="image" width="300" height="150">`);
+			}
+		});
 	}
 
 	init();

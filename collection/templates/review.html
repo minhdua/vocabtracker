@@ -1,16 +1,19 @@
 {% extends 'base.html' %} {% block title %}Review{% endblock %} {% block include %} {% load static %} {% load collection_filters %}
 <link rel="stylesheet" type="text/css" href="{% static '/css/review.css' %}" />
 {% endblock %} {% block content %}
+<h1>Reviews</h1>
+{% include 'modals.html' %}
+<div class="container">
+	<form action="#" method="post">
+		{% csrf_token %}
+		<div id="questions">
+			<!-- <input type="submit" value="Trả lời" /> -->
+		</div>
 
-<form action="#" method="post">
-	{% csrf_token %}
-	<div id="questions">
-		<!-- <input type="submit" value="Trả lời" /> -->
-	</div>
-
-	<input id="submit" type="button" value="Trả lời" />
-</form>
-<input type="hidden" id="questions-data" value="{{ questions|jsonify }}" />
+		<input id="submit" type="button" value="Trả lời" />
+	</form>
+	<input type="hidden" id="questions-data" value="{{ questions|jsonify }}" />
+</div>
 {% endblock %} {% block javascript %}
 <script type="module" src="{% static 'js/review.js' %}"></script>
 {% endblock %}

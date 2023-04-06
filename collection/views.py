@@ -2,11 +2,13 @@ import base64
 import json
 from random import shuffle
 import random
+import urllib.parse
 import re
+from . import utils
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.forms import formset_factory, model_to_dict
-
+from django.db.models import Q
 from Levenshtein import distance
 
 from .enums import TEST_MODE_CHOICES
@@ -48,7 +50,13 @@ def vocab_list(request, topic_id):
                             Vocabulary, id=cleaned_data['id'])
                         vocabulary.word = cleaned_data['word']
                         vocabulary.pronunciation = cleaned_data['pronunciation']
-                        vocabulary.image_url = cleaned_data['image_url']
+                        image_url = cleaned_data['image_url']
+                        # Nếu image_url null thì lấy url từ utils
+                        if image_url is None or image_url == '':
+                            images = utils.extract_urls('image for vocabulary '+vocabulary.meaning,limit=10)
+                             #get random 1 image
+                            image_url =  random.choice(images[2:])
+                        vocabulary.image_url = image_url
                         vocabulary.meaning = cleaned_data['meaning']
                         vocabulary.save()
                     else:
@@ -65,30 +73,86 @@ def vocab_list(request, topic_id):
         formset = VocabularyFormSet(initial=vocabularies_values)
     return render(request, 'add.html', {'formset': formset, 'topic': topic})
 
-
+def topic_search(request):
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term')
+        if search_term is None or search_term == '':
+            return redirect('topic_list')
+        # get vocabulary by search term word or pronunciation or meaning
+        vocabularies = Vocabulary.objects.filter(
+            Q(word__icontains=search_term) | 
+            Q(pronunciation__icontains=search_term) | 
+            Q(meaning__icontains=search_term)
+        )
+        results = []
+        for vocabulary in vocabularies:
+            result = {
+                'word': vocabulary.word,
+                'pronunciation': vocabulary.pronunciation,
+                'meaning': vocabulary.meaning,
+                'topic': vocabulary.topic.name,
+                'attempts': {
+                    'total': vocabulary.attempts_total,
+                    'right': vocabulary.attempts_correct,
+                },
+                'checks': {
+                    'total': vocabulary.checks_total,
+                    'right': vocabulary.checks_correct,
+                },
+            }
+            results.append(result)
+        return JsonResponse(results, safe=False)
+    else:
+        return redirect('topic_list')
+    
 def topic_list(request):
-    topics = Topic.objects.all()
+    topics = Topic.objects.order_by('index', 'id').all()
+    # additional totals, typings, reviews for topic
+    for topic in topics:
+        topic.description = '' if topic.description is None else topic.description
+        topic.totals = Vocabulary.objects.filter(topic=topic).count()
+        topic.typings = 0
+        topic.reviews = 0
+        for vocabulary in Vocabulary.objects.filter(topic=topic):
+            topic.typings += vocabulary.attempts_total
+            topic.reviews += vocabulary.checks_total
+
     return render(request, 'list.html', {'topics': topics})
 
 
-def add_topic(request):
+def topic(request):
     if request.method == 'POST':
-        form = TopicForm(request.POST)
-        if form.is_valid():
-            topic = form.save(commit=False)
+        topic_id = request.POST.get('id')
+        if topic_id:
+            topic = get_object_or_404(Topic, id=topic_id)
+            topic.name = request.POST.get('name')
+            topic.index = request.POST.get('index')
+            topic.description = request.POST.get('description')
+            topic.image_url = request.POST.get('image_url')
             topic.save()
-            return redirect('topic_list')
         else:
-            print(form.errors)
+            Topic.objects.create(
+                name=request.POST.get('name'),
+                index=request.POST.get('index'),
+                description=request.POST.get('description'),
+                image_url=request.POST.get('image_url'),
+            )
+        return HttpResponse(status=200, content='success')
+    elif request.method == 'DELETE':
+        payload_dict = urllib.parse.parse_qs(request.body.decode('utf-8'))
+        topic_id = int(payload_dict.get('topic_id')[0])
+        topic = get_object_or_404(Topic, id=topic_id)
+        topic.delete()
+        return JsonResponse({'success': True})
     else:
         form = TopicForm()
-    return render(request, 'add_topic.html', {'form': form})
-
-# get study.html
-
+    return redirect('topic_list')
 
 def study(request):
     topic_ids = request.GET.getlist('topic_id')
+    #if not topic_ids then get all topics
+    if not topic_ids:
+        topic_ids = Topic.objects.all().values_list('id', flat=True)
     vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
     vocabulary_dict =[model_to_dict(v) for v in vocabularies]
     # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
@@ -106,7 +170,10 @@ def handle_typing(request):
         for word in words:
             if len(word.strip()) != 0:
                 vocabulary.attempts_total = vocabulary.attempts_total + 1
-                if word == vocabulary.word or word == vocabulary.pronunciation:
+                #những từ trong ngoặc vuông hoặc ngoặc tròn thì không lấy để so sánh
+                _word = re.sub(r'[\(\[].*?[\)\]]', '', vocabulary.word)
+                _pronunciation = vocabulary.pronunciation
+                if word == _pronunciation or word == _word:
                     vocabulary.attempts_correct = vocabulary.attempts_correct + 1
                 else:
                     if not vocabulary.attempts_incorrect:
@@ -134,11 +201,13 @@ def find_most_similar_words(word, word_list):
     return [w[0] for w in sorted_distances[:3]]
 
 def review(request):
-   
     topic_ids = request.GET.getlist('topic_id') 
+    #if not topic_ids then get all topics
+    if not topic_ids:
+        topic_ids = Topic.objects.all().values_list('id', flat=True)
     vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
-    from_word = int(request.POST.get('from', 0))
-    to_word = int(request.POST.get('to', len(vocabularies)))
+    from_word = int(request.GET.get('from', 0))
+    to_word = int(request.GET.get('to', len(vocabularies)))
     vocabularies = list(vocabularies[from_word:to_word+1])
     questions = []
     for vocab in vocabularies:
@@ -189,6 +258,11 @@ def handle_review(request):
     if request.method == "POST":
         # Lấy dữ liệu từ request
         questions = json.loads(request.POST.get('questions'))
+        result = {
+            'total': len(questions),
+            'correct': 0,
+            'incorrect': 0,
+        }
 
         for question in questions:
             word = Vocabulary.objects.get(id=question['word_id'])
@@ -199,15 +273,17 @@ def handle_review(request):
             word.checks_total = word.checks_total + 1
             if question['answer'] == question['correct_answer']:
                 word.checks_correct = word.checks_correct + 1
+                result['correct'] = result['correct'] + 1
             else :
                 if question['answer'] == 'no answer' and word.uncheck_ifnull:
                     continue
                 if not word.checks_incorrect:
                     word.checks_incorrect = []
                 word.checks_incorrect.append(question['answer'])
+                result['incorrect'] = result['incorrect'] + 1
             word.save()
         # Trả về response là một đối tượng JSON
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'result': result})
     
 def my_pdf_view(request):
     # Open the PDF file
@@ -219,3 +295,5 @@ def my_pdf_view(request):
 
     # Return the response as base64-encoded string
     return HttpResponse(encoded_pdf)
+
+

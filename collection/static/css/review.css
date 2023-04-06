@@ -73,3 +73,18 @@ label[for="uncheckifnull"] {
 	font-weight: normal;
 	font-size: small;
 }
+
+#points-earned {
+	color: #007bff;
+	font-weight: bold;
+	background-color: #f2f2f2;
+	padding: 0.2em 0.5em;
+	border-radius: 0.25em;
+}
+
+#num-correct,
+#num-incorrect,
+#num-questions {
+	color: green;
+	font-weight: bold;
+}

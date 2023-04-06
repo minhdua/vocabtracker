@@ -5,6 +5,8 @@ $(document).ready(function () {
 	var vocabularies = [];
 
 	var soundOn = true;
+	var isRepeat = true;
+	var intervalId = null;
 	var currentIndex = 0;
 
 	let timer;
@@ -33,6 +35,25 @@ $(document).ready(function () {
 		return vocabularies[currentIndex];
 	}
 
+	function startInterval() {
+		if (intervalId) {
+			clearInterval(intervalId);
+		}
+		intervalId = setInterval(function () {
+			if (soundOn) {
+				var currentWord = getCurrentWord();
+				speech(currentWord.word);
+			}
+		}, 5000);
+	}
+
+	function stopInterval() {
+		if (intervalId) {
+			clearInterval(intervalId);
+			intervalId = null;
+		}
+	}
+
 	function displayWord() {
 		if (!vocabularies || vocabularies.length === 0) {
 			return;
@@ -47,8 +68,14 @@ $(document).ready(function () {
 		$("#correct-checks").text(`${currentWord.checks_correct || 0}/${currentWord.checks_total || 0}`);
 		$("#total-word").text(vocabularies.length);
 		$("#total-word").text(`${(currentIndex || 0) + 1}/${vocabularies.length || 0}`);
-		if (soundOn) {
-			speech(currentWord.word);
+
+		if (isRepeat) {
+			startInterval();
+		} else {
+			stopInterval();
+			if (soundOn) {
+				speech(currentWord.word);
+			}
 		}
 		checkOnOffButton();
 		updateAttemptsTotal();
@@ -254,39 +281,45 @@ $(document).ready(function () {
 				clearInput();
 				isCommands = true;
 			} else if (line.startsWith("\\review")) {
-				// Lấy đường dẫn hiện tại của URL
-				var number = topicId;
+				// get all ids params url
+				// get the query string from the URL
 
-				// Kiểm tra xem number có phải là số hay không
-				if (!isNaN(number)) {
-					// Số 2 đã được lấy thành công, bạn có thể sử dụng biến number ở đây
-					// Tạo ra đối tượng URL từ URL hiện tại
-					var url = new URL(window.location.href);
+				// Số 2 đã được lấy thành công, bạn có thể sử dụng biến number ở đây
+				// Tạo ra đối tượng URL từ URL hiện tại
+				var url = new URL(window.location.href);
 
-					// Thay đổi đường dẫn và các tham số trên URL
-					url.pathname = `/review/${number}/`;
-					let fromIndex = 0;
-					let toIndex = vocabularies.length - 1;
-					let parts = line.split(" ");
-					for (let j = 0; j < parts.length; j++) {
-						if (parts[j] === "--from" && j + 1 < parts.length) {
-							fromIndex = parseInt(parts[j + 1]) - 1;
-						} else if (parts[j] === "--to" && j + 1 < parts.length) {
-							toIndex = parseInt(parts[j + 1]) - 1;
-						}
+				// Thay đổi đường dẫn và các tham số trên URL
+				url.pathname = `/review`;
+				let fromIndex = 0;
+				let toIndex = vocabularies.length - 1;
+				let parts = line.split(" ");
+				for (let j = 0; j < parts.length; j++) {
+					if (parts[j] === "--from" && j + 1 < parts.length) {
+						fromIndex = parseInt(parts[j + 1]) - 1;
+					} else if (parts[j] === "--to" && j + 1 < parts.length) {
+						toIndex = parseInt(parts[j + 1]) - 1;
 					}
-					url.searchParams.set("from", fromIndex);
-					url.searchParams.set("to", toIndex);
-					// Chuyển hướng đến URL mới
-					window.open(url.toString(), "_blank");
-				} else {
-					// Không tìm thấy số trên URL
-					console.log("Number not found in URL");
 				}
+				const queryString = window.location.search;
+
+				// create a new URLSearchParams object
+				const urlParams = new URLSearchParams(queryString);
+
+				// loop through all the query parameters and log their values
+				for (const [key, value] of urlParams) {
+					url.searchParams.set(key, value);
+				}
+
+				url.searchParams.set("from", fromIndex);
+				url.searchParams.set("to", toIndex);
+				// Chuyển hướng đến URL mới
+				window.open(url.toString(), "_blank");
+
 				i = lines.length; // break out of the loop
 				displayWord();
 				clearInput();
 				pauseTimer();
+				stopInterval();
 				isCommands = true;
 			}
 		}

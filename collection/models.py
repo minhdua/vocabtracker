@@ -7,6 +7,7 @@ from .enums import PARTS_OF_SPEECH_CHOICES, TEST_MODE_CHOICES
 class Topic(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    index = models.IntegerField(default=0)
     image_url = models.ImageField(
         blank=True, null=True, upload_to='topic_images/')
 

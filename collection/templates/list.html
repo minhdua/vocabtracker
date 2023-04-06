@@ -2,21 +2,29 @@
 <link rel="stylesheet" type="text/css" href="{% static '/css/list.css' %}" />
 {% endblock %} {% block content %}
 <h1>Topics</h1>
-{% include 'add_topic.html' %}
+
+{% include 'modals.html' %}
 <div class="container">
-	<div class="row">
-		<div class="col-md-12" style="margin-bottom: 16px">
-			<button type="button" id="add-topic-btn" class="btn btn-primary d-inline-block btn-add" data-bs-toggle="modal" data-bs-target="#addTopicModal">Add</button>
-			<button type="button" id="study-topic-btn" class="btn btn-primary d-inline-block btn-study">Study</button>
-			<button type="button" id="review-topic-btn" class="btn btn-primary d-inline-block btn-review">Review</button>
-		</div>
+	<div class="input-group mb-3">
+		<input type="text" class="form-control" placeholder="Search topics" aria-label="Search topics" id="search-input" />
+		<button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
 	</div>
-	<div class="row row-cols-2 row-cols-md-4 g-4">
-		{% for topic in topics %}
-		<!-- prettier-ignore -->
-		{% include '_topic_card.html' with id=topic.id title=topic.name description=topic.description image_url=topic.image_url %}
-		<!-- prettier-ignore -->
-		{% endfor %}
+	<div class="result-search"></div>
+	<div class="list-topic">
+		<div class="row">
+			<div class="col-md-12 buttons-global">
+				<button type="button" id="add-topic-btn" class="btn btn-primary d-inline-block btn-add" data-bs-toggle="modal" data-bs-target="#addTopicModal">Add</button>
+				<button type="button" id="study-topic-btn" class="btn btn-primary d-inline-block btn-study">Study</button>
+				<button type="button" id="review-topic-btn" class="btn btn-primary d-inline-block btn-review">Review</button>
+			</div>
+		</div>
+		<div class="row row-cols-2 row-cols-md-3 g-4">
+			{% for topic in topics %}
+			<!-- prettier-ignore -->
+			{% include '_topic_card.html' with id=topic.id title=topic.name description=topic.description image_url=topic.image_url totals=topic.totals typings=topic.typings reviews=topic.reviews index=topic.index %}
+			<!-- prettier-ignore -->
+			{% endfor %}
+		</div>
 	</div>
 </div>
 {% endblock %} {% block javascript %}

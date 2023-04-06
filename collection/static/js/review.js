@@ -2,6 +2,7 @@ import { speech } from "./sound.js";
 import "./ajax-settings.js";
 $(document).ready(function () {
 	var questions = [];
+	var pointResultModal = $("#points-modal");
 	init();
 
 	function showQuestion() {
@@ -52,6 +53,8 @@ $(document).ready(function () {
 			$(".phonetic").on("click", function (e) {
 				e.preventDefault();
 				speech($(this).text());
+				//radio tương ứng được check
+				$(this).prev("input").prop("checked", true);
 			});
 		} else {
 			console.log("questions is not an array or contains no elements");
@@ -140,7 +143,18 @@ $(document).ready(function () {
 			method: "POST", // Phương thức của yêu cầu
 			data: { questions: JSON.stringify(questions) }, // Dữ liệu gửi lên máy chủ
 			success: function (data) {
-				// Xử lý kết quả trả về từ máy chủ
+				var result = data.result;
+
+				var correct = result.correct;
+				var total = result.total;
+				var incorrect = result.incorrect;
+				var point = ((correct / total) * 100).toFixed(2);
+				// lấy 2 số thập phân
+				$("#points-earned").text(point);
+				$("#num-correct").text(correct);
+				$("#num-incorrect").text(incorrect);
+				$("#num-questions").text(total);
+				pointResultModal.modal("show");
 			},
 			error: function (xhr, status, error) {
 				// Xử lý lỗi nếu có
