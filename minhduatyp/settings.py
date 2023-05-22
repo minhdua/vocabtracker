@@ -106,15 +106,26 @@ DATABASES = {
     #     'PASSWORD': 'vocabtracker12345678'
     # }
 
-    'default': {
+    # 'default': {
 
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'qjbgruvq',  # replace with your database name
+    #     'HOST': 'floppy.db.elephantsql.com',
+    #     'PORT': 5432,
+    #     'USER': 'qjbgruvq',
+    #     'PASSWORD': 'AVUpge201Nfd-P9OmH6LCuGiIe_0Itwf'
+    # }
+
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'qjbgruvq',  # replace with your database name
-        'HOST': 'floppy.db.elephantsql.com',
-        'PORT': 5432,
-        'USER': 'qjbgruvq',
-        'PASSWORD': 'AVUpge201Nfd-P9OmH6LCuGiIe_0Itwf'
+        'NAME': os.environ.get('DB_NAME'),
+
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
     }
+
 }
 
 # Password validation
