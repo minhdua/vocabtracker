@@ -1,6 +1,4 @@
-import requests
 import os
-import magic
 import urllib.request
 from typing import List
 
