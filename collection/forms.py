@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Question, Test, Topic, Vocabulary
+from .models import Topic, Vocabulary
 
 
 class VocabularyForm(forms.ModelForm):
@@ -15,6 +15,7 @@ class VocabularyForm(forms.ModelForm):
 
 class TopicForm(forms.ModelForm):
     id = forms.IntegerField(widget=forms.HiddenInput())
+
     class Meta:
         model = Topic
         fields = ('id', 'name', 'description', 'image_url')

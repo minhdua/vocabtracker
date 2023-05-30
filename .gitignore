@@ -19,5 +19,8 @@ venv/
 *.swp
 .DS_Store
 .prettierrc
+.env
 
 migrations/
+
+

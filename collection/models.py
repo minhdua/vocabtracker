@@ -40,20 +40,3 @@ class Vocabulary(models.Model):
     uncheck_ifnull = models.BooleanField(default=False)
 
     # study_time =
-
-
-class Question(models.Model):
-    test_mode = models.CharField(
-        max_length=20, choices=TEST_MODE_CHOICES, default="meaning")
-    word = models.ForeignKey(
-        Vocabulary, on_delete=models.CASCADE, related_name='questions')
-    distractor_1 = models.CharField(max_length=255, null=True)
-    distractor_2 = models.CharField(max_length=255, null=True)
-    distractor_3 = models.CharField(max_length=255, null=True)
-    distractor_4 = models.CharField(max_length=255, null=True)
-    answer = models.CharField(max_length=255)
-
-
-class Test(models.Model):
-    questions = models.ForeignKey(
-        Question, related_name='tests', on_delete=models.CASCADE)
