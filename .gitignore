@@ -5,11 +5,12 @@
 __pycache__/
 *.log
 
+# Ignore static files
+staticfiles/
+
 # Ignore database files
 db.sqlite3
 
-# Ignore static files
-staticfiles/
 
 # Ignore virtual environment folder
 venv/
