@@ -1,7 +1,8 @@
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from .enums import PARTS_OF_SPEECH_CHOICES, TEST_MODE_CHOICES
+from enumchoicefield import EnumChoiceField
+from .enums import PARTS_OF_SPEECH_CHOICES, TEST_MODE_CHOICES, LanguageEnum
 
 
 class Topic(models.Model):
@@ -10,11 +11,14 @@ class Topic(models.Model):
     index = models.IntegerField(default=0)
     image_url = models.ImageField(
         blank=True, null=True, upload_to='topic_images/')
+    language = EnumChoiceField(LanguageEnum, default=LanguageEnum.ENGLISH)
 
 
 class Vocabulary(models.Model):
-    word = models.CharField(max_length=255)
-    pronunciation = models.CharField(max_length=255)
+    refer_patterns = ArrayField(models.CharField(
+        max_length=255), blank=True, null=True, default=list)
+    word = models.CharField(max_length=255, null=True, blank=True)
+    pronunciation = models.CharField(max_length=255, null=True, blank=True)
     meaning = models.CharField(max_length=255)
     parts_of_speech = models.CharField(
         max_length=20, choices=PARTS_OF_SPEECH_CHOICES, default=None, null=True)
@@ -38,5 +42,16 @@ class Vocabulary(models.Model):
         Topic, on_delete=models.CASCADE, related_name='vocabulary')
     flag = models.BooleanField(default=True)
     uncheck_ifnull = models.BooleanField(default=False)
+
+
+class JPVocab(Vocabulary):
+    kanji = models.CharField(max_length=255, blank=True, null=True)
+    katakana = models.CharField(max_length=255, blank=True, null=True)
+    romaji = models.CharField(max_length=255, blank=True, null=True)
+    hiragana = models.CharField(max_length=255, blank=True, null=True)
+
+# class EngVocab(Vocabulary):
+#     word = models.CharField(max_length=255, blank=True, null=True)
+#     pronunciation = models.CharField(max_length=255, blank=True, null=True)
 
     # study_time =

@@ -13,6 +13,17 @@ class VocabularyForm(forms.ModelForm):
         fields = ['id', 'word', 'pronunciation', 'meaning', 'image_url']
 
 
+class JPVocabForm(forms.ModelForm):
+    # Add a hidden input for the vocabulary id
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    pronunciation = forms.CharField(required=False)
+
+    class Meta:
+        model = Vocabulary
+        fields = ['id', 'word', 'pronunciation', 'meaning',
+                  'image_url', 'kanji', 'hiragana', 'katakana', 'romaji']
+
+
 class TopicForm(forms.ModelForm):
     id = forms.IntegerField(widget=forms.HiddenInput())
 

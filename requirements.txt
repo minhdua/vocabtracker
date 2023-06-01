@@ -15,3 +15,4 @@ sqlparse
 tzdata
 urllib3
 gunicorn
+django-enumchoicefield
