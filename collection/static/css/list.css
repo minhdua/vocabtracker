@@ -78,6 +78,6 @@
 .topic-actions {
   background-color: #3498db;
   position: sticky;
-  top: 9999;
+  top: 0;
   z-index: 3;
 }
