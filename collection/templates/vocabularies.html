@@ -1,0 +1,61 @@
+{% extends 'base.html' %} {% block include %} {% load static %}
+    {% comment %} <link rel="stylesheet" type="text/css" href="{% static '/css/add.css' %}" /> {% endcomment %}
+{% endblock %} {% block content %}
+    <h1>{{topic.name}}</h1>
+    {% include 'modals.html' %}
+    <div class="container">
+        <form method="post">
+            <div class="buttons-global">
+                <button id="save-table" class="btn btn-primary" type="submit">Save</button>
+                <button type="button" id="import-excel" class="btn btn-primary d-inline-block btn-import-excel">Import Excel</button>
+                <button type="button" id="import-json" class="btn btn-primary d-inline-block btn-import-json">Import Json</button>
+            </div>
+            <table id="vocab-table" class="table table-bordered border-primary">
+                <thead class="table-success">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Word</th>
+                        {% if topic.language.display_text == 'Japanese' %}
+                            <th scope="col">Kanji</th>
+                            <th scope="col">Romaji</th>
+                        {% endif %}
+                        {% if topic.language.display_text == 'English' %}
+                            <th scope="col">Pronunciation</th>
+                        {% endif %}
+                        <th scope="col">Meaning</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vocabulary in vocabularies %}
+                        {% with index=forloop.counter %}
+                            <tr>
+                                <th class="index">{{ index }}</th>
+                                <td>{{ vocabulary.word }}</td>
+                                {% if topic.language.display_text == 'Japanese' %}
+                                    <td>{% if vocabulary.kanji %}{{ vocabulary.kanji }}{% endif %}</td>
+                                    <td>{% if vocabulary.romaji %}{{ vocabulary.romaji }}{% endif %}</td>
+                                {% endif %}
+                                {% if topic.language.display_text == 'English' %}
+                                    <td>{% if vocabulary.pronunciation %}{{ vocabulary.pronunciation }}{% endif %}</td>
+								{% endif %}
+                                <td>{{ vocabulary.meaning }}</td>
+                                <td>
+                                    <i class="fa fa-times remove-row"></i>
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button id="add-row" class="btn btn-primary" type="button" data-formset="{{ formset.prefix }}">Add</button>
+        </form>
+    </div>
+
+{% endblock %} {% block scripts %}
+    <script>
+        $('#vocab-table').DataTable({
+          })
+    </script>
+    {% comment %} <py-script src="{% static 'py/vocabularies.py' %}"></py-script> {% endcomment %}
+{% endblock %}

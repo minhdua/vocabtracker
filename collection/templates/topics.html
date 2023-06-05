@@ -1,0 +1,33 @@
+{% extends 'base.html' %} {% block include %} {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static '/css/list.css' %}" />
+{% endblock %} {% block content %}
+  <h1>Topics</h1>
+
+  {% include 'modals.html' %}
+  <div class="container">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Search topics" aria-label="Search topics" id="search-input" />
+      <button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
+    </div>
+    <div class="result-search"></div>
+    <div class="topic-actions">
+      <div class="row">
+        <div class="col-md-12 buttons-global">
+          <button type="button" id="add-topic-btn" class="btn btn-primary d-inline-block btn-add" data-bs-toggle="modal" data-bs-target="#addTopicModal">Add</button>
+          <button type="button" id="study-topic-btn" class="btn btn-primary d-inline-block btn-study">Study</button>
+          <button type="button" id="review-topic-btn" class="btn btn-primary d-inline-block btn-review">Review</button>
+        </div>
+      </div>
+    </div>
+    <div class="list-topic">
+      <div class="row row-cols-2 row-cols-md-3 g-4">
+        {% for topic in topics %}
+          {% include 'topic_card.html' with topic=topic %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %} {% block scripts %}
+  <script type="module" src="{% static 'js/list.js' %}"></script>
+
+{% endblock %}

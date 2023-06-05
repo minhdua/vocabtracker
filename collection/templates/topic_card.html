@@ -1,0 +1,29 @@
+<div class="col">
+    <div class="card">
+        {% if topic.image_url %}
+            <img src="{{ topic.image_url }}" class="card-img-top" alt="..." />
+        {% else %} {% load static %}
+            <img src="{% static 'images/default-topic.jpg' %}" class="card-img-top" alt="Default image" />
+        {% endif %}
+        <div class="card-body">
+            <h3 class="card-title"><input type="checkbox" name="topic-choice" class="form-check-input" id="{{topic.id}}" /> {{ topic.name }}</h3>
+            <h6 class="language">{{ topic.language.display_text }}</h6>
+            <p class="card-figure" style="font-size: 14px; margin: 0 0 8px 0">
+                <span class="list"> <i class="fas fa-list" title="Totals"></i>  {{topic.totals}}</span>
+                <span class="keyboard"><i class="fas fa-keyboard" title="Typings"></i> {{topic.typings}}</span>
+                <span class="star"> <i class="fas fa-star" title="Reviews"></i> {{topic.reviews}}</span>
+            </p>
+            <input type="hidden" class="topic-index" value="{{topic.index}}" />
+            <p class="card-text topic-description">{{ topic.description }}</p>
+        </div>
+        <div class="card-footer">
+            <a href="#" class="btn btn-primary btn-sm float-end detail-button" title="Detail"><i class="fas fa-info-circle"></i></a>
+            <a href="{{topic.id}}" class="btn btn-primary btn-sm float-end vocabularies-button" title="Vocabularies"><i class="fas fa-book"></i></a>
+            <a href="#" class="btn btn-primary btn-sm float-end grammars-button" title="Grammars"><i class="fas fa-graduation-cap"></i></a>
+            <a href="#" class="btn btn-primary btn-sm float-end exercises-button" title="Exercises"><i class="fas fa-tasks"></i></a>
+            <a href="#" class="btn btn-primary btn-sm float-end documentations-button" title="Documentations" class=""><i class="fas fa-file-alt"></i></a>
+            <a href="#" class="btn btn-primary btn-sm float-end edit-button" title="Edit"><i class="fas fa-edit"></i></a>
+            <a href="#" class="btn btn-danger btn-sm float-end delete-button" title="Delete"><i class="fas fa-trash"></i></a>
+        </div>
+    </div>
+</div>

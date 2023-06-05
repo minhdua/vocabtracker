@@ -22,14 +22,12 @@
     <div class="list-topic">
       <div class="row row-cols-2 row-cols-md-3 g-4">
         {% for topic in topics %}
-      <!-- prettier-ignore -->
-          {% include '_topic_card.html' with id=topic.id title=topic.name description=topic.description image_url=topic.image_url totals=topic.totals typings=topic.typings reviews=topic.reviews index=topic.index %}
-      <!-- prettier-ignore -->
+          {% include 'topic_card.html' with topic=topic %}
         {% endfor %}
       </div>
     </div>
   </div>
-{% endblock %} {% block javascript %}
+{% endblock %} {% block scripts %}
   <script type="module" src="{% static 'js/list.js' %}"></script>
 
 {% endblock %}
