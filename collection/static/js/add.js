@@ -3,6 +3,12 @@ $(document).ready(function () {
   var btnImportJson = $('#import-json')
   var btnImportJsonModal = $('#import-json-button')
 
+  $('#vocab-table').DataTable({
+    dom: 'Bfrtip',
+    buttons: ['copy', 'excel', 'pdf'],
+    select: true
+  })
+
   btnImportJson.click(function () {
     //clear textarea
     $('#json-textarea').val('')

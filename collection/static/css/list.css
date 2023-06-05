@@ -81,3 +81,25 @@
   top: 0;
   z-index: 3;
 }
+.card-body {
+  .language {
+    font-size: 14px;
+    color: #555;
+  }
+}
+.card-figure {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+
+  .list {
+    color: #2ecc71;
+  }
+
+  .keyboard {
+    color: #3498db;
+  }
+
+  .star {
+    color: #f1c40f;
+  }
+}

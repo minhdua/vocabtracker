@@ -4,6 +4,8 @@ from random import shuffle
 import random
 import urllib.parse
 import re
+
+from django.views import View
 from . import utils
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,9 +13,9 @@ from django.forms import formset_factory, model_to_dict
 from django.db.models import Q
 from Levenshtein import distance
 
-from .enums import TEST_MODE_CHOICES
+from .enums import TEST_MODE_CHOICES, LanguageEnum
 from .forms import TopicForm, VocabularyForm
-from .models import Topic, Vocabulary
+from .models import JPVocab, Topic, Vocabulary
 
 VocabularyFormSet = formset_factory(VocabularyForm, extra=0)
 
@@ -31,7 +33,12 @@ def index(request):
 
 def vocab_list(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
+    if topic.language == LanguageEnum.JAPANESE:
+        vocabularies = JPVocab.objects.filter(topic=topic).order_by('id').values()
+    # elif topic.language == 'EN': TODO: add EN
+    #     vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
+    else:
+        vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
     if request.method == 'POST':
         formset = VocabularyFormSet(request.POST)
         if formset.is_valid():
@@ -68,9 +75,11 @@ def vocab_list(request, topic_id):
                             topic=topic,
                         )
             return HttpResponseRedirect('/success/')
-    else:
+    elif request.method == 'GET':
         vocabularies_values = vocabularies.values()
         formset = VocabularyFormSet(initial=vocabularies_values)
+    else:
+        formset = VocabularyFormSet()
     return render(request, 'add.html', {'formset': formset, 'topic': topic})
 
 def topic_search(request):
@@ -297,3 +306,12 @@ def my_pdf_view(request):
     return HttpResponse(encoded_pdf)
 
 
+class VocabularyView(View):
+    def get(self, request, topic_id):
+        topic = get_object_or_404(Topic, id=topic_id)
+        if topic.language == LanguageEnum.JAPANESE:
+            vocabularies = JPVocab.objects.filter(topic=topic).order_by('id').values()
+        else:
+            vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
+        
+        return render(request, 'vocabularies.html', context={'topic':topic, 'vocabularies':vocabularies})

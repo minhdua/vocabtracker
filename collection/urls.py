@@ -1,10 +1,12 @@
 from django.urls import path
 from . import views
-
+from .views import VocabularyView
 urlpatterns = [
     path('success/', views.success_view, name='success'),
     path('', views.topic_list, name='topic_list'),
     path('<int:topic_id>/', views.vocab_list, name='vocab_list'),
+    path('<int:topic_id>/vocabulary/',
+         VocabularyView.as_view(), name='vocabulary_view'),
     path('topic/', views.topic, name='topic'),
     path('study/', views.study, name='study_topic'),
     path('study/handle_typing/', views.handle_typing,  name='handle_typing'),

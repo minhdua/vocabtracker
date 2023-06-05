@@ -67,6 +67,14 @@ python manage.py collectstatic
 python manage.py runserver
 ```
 
+### Xây dựng project
+
+1. format django template
+
+```bash
+djhtml <template.html>
+```
+
 ### Liên Hệ
 
 - Author: Minh Dua

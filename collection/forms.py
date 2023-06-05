@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Topic, Vocabulary
+from .models import JPVocab, Topic, Vocabulary
 
 
 class VocabularyForm(forms.ModelForm):
@@ -19,7 +19,7 @@ class JPVocabForm(forms.ModelForm):
     pronunciation = forms.CharField(required=False)
 
     class Meta:
-        model = Vocabulary
+        model = JPVocab
         fields = ['id', 'word', 'pronunciation', 'meaning',
                   'image_url', 'kanji', 'hiragana', 'katakana', 'romaji']
 
