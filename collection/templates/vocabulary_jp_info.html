@@ -1,0 +1,44 @@
+{% load static %}
+<table id="vocab-table">
+	<thead>
+		<tr>
+			<th id="header-word">Word <i class="fa fa-bookmark" aria-hidden="true"></i></th>
+			<th>Kanji</th>
+			<th>Romaji</th>
+			<th>Meaning</th>
+			<th>Note</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!-- Placeholder rows for data -->
+		<tr>
+			<td id="word"></td>
+			<td id="kanji"></td>
+			<td id="romaji"></td>
+			<td id="meaning"></td>
+			<td id="note"></td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td colspan="3" id="total-word"></td>
+			<td id="total-correct">0</td>
+			<td id="total-checks">0</td>
+		</tr>
+	</tfoot>
+	<thead>
+		<th colspan="3">Image</th>
+		<th>Correct Attempts</th>
+		<th>Total Checks</th>
+	</thead>
+	<tbody>
+		<td colspan="3">
+			<div id="image">
+				<img src="{% static 'images/default-image.png' %}" alt="Word Image" />
+			</div>
+		</td>
+		<td id="correct-attempts"></td>
+		<td id="correct-checks"></td>
+	</tbody>
+</table>
+	

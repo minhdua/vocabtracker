@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"editor.stickyScroll.enabled": false,
+		"workbench.editor.wrapTabs": true
+	}
+}

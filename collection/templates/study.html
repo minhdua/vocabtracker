@@ -2,55 +2,20 @@
 <link rel="stylesheet" type="text/css" href="{% static '/css/study.css' %}" />
 {% endblock %} {% block content %}
 <div class="container">
-	<h1>Vocabulary</h1>
+	<h1 id="topic-name">{{vocabulary.topic_name}}</h1>
 	<!-- <embed src="{% static 'pdfs/Toiec.pdf' %}" type="application/pdf" width="100%" height="600px" /> -->
 	<div class="navigation">
 		<button id="prev-btn" disabled>&lt; Previous</button>
 		<button id="sound-btn">Sound On</button>
 		<button id="next-btn">Next &gt;</button>
 	</div>
-	<table id="vocab-table">
-		<thead>
-			<tr>
-				<th id="header-word">Word <i class="fa fa-bookmark" aria-hidden="true"></i></th>
-				<th>Pronunciation</th>
-				<th>Meaning</th>
-				<th>Part of Speech</th>
-				<th>Note</th>
-			</tr>
-		</thead>
-		<tbody>
-			<!-- Placeholder rows for data -->
-			<tr>
-				<td id="word"></td>
-				<td id="pronunciation"></td>
-				<td id="meaning"></td>
-				<td id="part-of-speech"></td>
-				<td id="note"></td>
-			</tr>
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="3" id="total-word"></td>
-				<td id="total-correct">0</td>
-				<td id="total-checks">0</td>
-			</tr>
-		</tfoot>
-		<thead>
-			<th colspan="3">Image</th>
-			<th>Correct Attempts</th>
-			<th>Total Checks</th>
-		</thead>
-		<tbody>
-			<td colspan="3">
-				<div id="image">
-					<img src="{% static 'images/default-image.png' %}" alt="Word Image" />
-				</div>
-			</td>
-			<td id="correct-attempts"></td>
-			<td id="correct-checks"></td>
-		</tbody>
-	</table>
+	
+	{% if vocabulary.lang == 'JA'%}
+		{% include 'vocabulary_jp_info.html' with topic=topic%}
+	{% else%}
+		{% include 'vocabulary_en_info.html' with topic=topic%}
+	{% endif%}
+
 	<div id="incorrect-last" hidden style="backgroundcolor: #f8d7da; color: #721c24; padding: 1rem; border: 1px solid #f5c6cb; borderradius: 0.25rem">
 		A wild error has appeared!
 	</div>
@@ -80,32 +45,32 @@
 	</div>
 </div>
 <input type="hidden" id="vocabularies-data" value="{{vocabularies|jsonify}}" />
-<p>Lệnh <code>\pre</code>: Di chuyển ngược lại từ trước đó.</p>
-<p>Cú pháp: <code>\pre [number]</code></p>
+<p>Lệnh <code>/pre</code>: Di chuyển ngược lại từ trước đó.</p>
+<p>Cú pháp: <code>/pre [number]</code></p>
 <p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ đầu tiên trong danh sách, nó sẽ dừng lại ở từ đầu tiên.</p>
-<p>Ví dụ: <code>\pre 3</code> sẽ bỏ qua 3 từ trước đó.</p>
+<p>Ví dụ: <code>/pre 3</code> sẽ bỏ qua 3 từ trước đó.</p>
 
-<p>Lệnh <code>\next</code>: Di chuyển tiến tới từ tiếp theo.</p>
-<p>Cú pháp: <code>\next [number]</code></p>
+<p>Lệnh <code>/next</code>: Di chuyển tiến tới từ tiếp theo.</p>
+<p>Cú pháp: <code>/next [number]</code></p>
 <p><em>number</em> (tùy chọn): số lượng từ cần bỏ qua, mặc định là 1. Nếu số lượng từ bỏ qua lớn hơn từ cuối cùng trong danh sách, nó sẽ dừng lại ở từ cuối cùng.</p>
-<p>Ví dụ: <code>\next 3</code> sẽ bỏ qua 3 từ tiếp theo.</p>
+<p>Ví dụ: <code>/next 3</code> sẽ bỏ qua 3 từ tiếp theo.</p>
 
-<p>Lệnh <code>\goto</code>: Di chuyển tới từ ở vị trí thứ number trong danh sách.</p>
-<p>Cú pháp: <code>\goto &lt;number&gt;</code></p>
+<p>Lệnh <code>/goto</code>: Di chuyển tới từ ở vị trí thứ number trong danh sách.</p>
+<p>Cú pháp: <code>/goto &lt;number&gt;</code></p>
 <p><em>number</em>: vị trí từ cần di chuyển tới. Nếu number lớn hơn độ dài danh sách hoặc nhỏ hơn 1, lệnh sẽ không có tác dụng.</p>
-<p>Ví dụ: <code>\goto 5</code>sẽ di chuyển tới từ thứ 5 trong danh sách.</p>
+<p>Ví dụ: <code>/goto 5</code>sẽ di chuyển tới từ thứ 5 trong danh sách.</p>
 
-<p>Lệnh <code>\sound --off</code>: Tắt âm thanh phát ra khi hiển thị từ.</p>
-<p>Ví dụ: <code>\sound --off</code> sẽ tắt âm thanh phát ra.</p>
-<p>Lệnh <code>\sound --on</code>: Bật lại âm thanh phát ra khi hiển thị từ.</p>
-<p>Cú pháp: <code>\sound --on</code></p>
-<p>Ví dụ: <code>\sound --on</code> sẽ bật lại âm thanh phát ra.</p>
+<p>Lệnh <code>/sound --off</code>: Tắt âm thanh phát ra khi hiển thị từ.</p>
+<p>Ví dụ: <code>/sound --off</code> sẽ tắt âm thanh phát ra.</p>
+<p>Lệnh <code>/sound --on</code>: Bật lại âm thanh phát ra khi hiển thị từ.</p>
+<p>Cú pháp: <code>/sound --on</code></p>
+<p>Ví dụ: <code>/sound --on</code> sẽ bật lại âm thanh phát ra.</p>
 
-<p>Lệnh <code>\review</code>: Chuyển đến trang đánh giá với các từ được chọn.</p>
-<p>Cú pháp: <code>\review [--from &lt;number&gt;] [--to &lt;number&gt;]</code></p>
+<p>Lệnh <code>/review</code>: Chuyển đến trang đánh giá với các từ được chọn.</p>
+<p>Cú pháp: <code>/review [--from &lt;number&gt;] [--to &lt;number&gt;]</code></p>
 <p><em>--from</em> (tùy chọn): chỉ số của từ đầu tiên trong danh sách được đánh giá, mặc định là 1.</p>
 <p><em>--to</em> (tùy chọn): chỉ số của từ cuối cùng trong danh sách được đánh giá, mặc định là số lượng từ trong danh sách.</p>
-<p>Ví dụ: <code>\review --from 3 --to 7</code>sẽ chuyển đến trang đánh giá các từ vựng từ 3 đến 7</p>
+<p>Ví dụ: <code>/review --from 3 --to 7</code>sẽ chuyển đến trang đánh giá các từ vựng từ 3 đến 7</p>
 {% endblock%} {% block scripts %}
 <script type="module" src="{% static 'js/study.js' %}"></script>
 {% endblock %}

@@ -35,6 +35,7 @@ def vocab_list(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     if topic.language == LanguageEnum.JAPANESE:
         vocabularies = JPVocab.objects.filter(topic=topic).order_by('id').values()
+        
     # elif topic.language == 'EN': TODO: add EN
     #     vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
     else:
@@ -157,44 +158,6 @@ def topic(request):
         form = TopicForm()
     return redirect('topic_list')
 
-def study(request):
-    topic_ids = request.GET.getlist('topic_id')
-    #if not topic_ids then get all topics
-    if not topic_ids:
-        topic_ids = Topic.objects.all().values_list('id', flat=True)
-    vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
-    vocabulary_dict =[model_to_dict(v) for v in vocabularies]
-    # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
-    return render(request, 'study.html', {'vocabularies': vocabulary_dict})
-
-
-def handle_typing(request):
-     if request.method == "POST":
-        # Lấy dữ liệu từ request
-        inputText = request.POST.get('input')
-        vocabId = request.POST.get('vocab')
-        vocabulary = Vocabulary.objects.get(id=vocabId)
-        words = re.split('\s*;\s*|\s*；\s*|\s*\n\s*',inputText)
-        incorrect_words = []
-        for word in words:
-            if len(word.strip()) != 0:
-                vocabulary.attempts_total = vocabulary.attempts_total + 1
-                #những từ trong ngoặc vuông hoặc ngoặc tròn thì không lấy để so sánh
-                _word = re.sub(r'[\(\[].*?[\)\]]', '', vocabulary.word)
-                _pronunciation = vocabulary.pronunciation
-                if word == _pronunciation or word == _word:
-                    vocabulary.attempts_correct = vocabulary.attempts_correct + 1
-                else:
-                    if not vocabulary.attempts_incorrect:
-                        vocabulary.attempts_incorrect = []
-                    vocabulary.attempts_incorrect.append(word)
-                    incorrect_words.append(word)
-        vocabulary.save()
-        vocabulary_dict = model_to_dict(vocabulary)
-        vocabulary_dict['incorect_word_last'] = incorrect_words
-        # Trả về response là một đối tượng JSON
-        return JsonResponse(vocabulary_dict)
-
 def pronunciation_or_word(words):
     words_convert= []
     for word in words:
@@ -305,13 +268,106 @@ def my_pdf_view(request):
     # Return the response as base64-encoded string
     return HttpResponse(encoded_pdf)
 
-
+#region Vocabulary View
 class VocabularyView(View):
     def get(self, request, topic_id):
         topic = get_object_or_404(Topic, id=topic_id)
         if topic.language == LanguageEnum.JAPANESE:
             vocabularies = JPVocab.objects.filter(topic=topic).order_by('id').values()
+            
         else:
             vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
         
         return render(request, 'vocabularies.html', context={'topic':topic, 'vocabularies':vocabularies})
+#endregion
+
+#region Study
+
+def study(request):
+    topic_ids = request.GET.getlist('topic_id')
+    #if not topic_ids then get all topics
+    if not topic_ids:
+        topic_ids = Topic.objects.all().values_list('id', flat=True)
+    vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+    vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+    # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
+    return render(request, 'study.html', {'vocabularies': vocabulary_dict})
+
+
+def handle_typing(request):
+     if request.method == "POST":
+        # Lấy dữ liệu từ request
+        inputText = request.POST.get('input')
+        vocabId = request.POST.get('vocab')
+        vocabulary = Vocabulary.objects.get(id=vocabId)
+        words = re.split('\s*;\s*|\s*；\s*|\s*\n\s*',inputText)
+        incorrect_words = []
+        for word in words:
+            if len(word.strip()) != 0:
+                vocabulary.attempts_total = vocabulary.attempts_total + 1
+                #những từ trong ngoặc vuông hoặc ngoặc tròn thì không lấy để so sánh
+                _word = re.sub(r'[\(\[].*?[\)\]]', '', vocabulary.word)
+                _pronunciation = vocabulary.pronunciation
+                if word == _pronunciation or word == _word:
+                    vocabulary.attempts_correct = vocabulary.attempts_correct + 1
+                else:
+                    if not vocabulary.attempts_incorrect:
+                        vocabulary.attempts_incorrect = []
+                    vocabulary.attempts_incorrect.append(word)
+                    incorrect_words.append(word)
+        vocabulary.save()
+        vocabulary_dict = model_to_dict(vocabulary)
+        vocabulary_dict['incorect_word_last'] = incorrect_words
+        # Trả về response là một đối tượng JSON
+        return JsonResponse(vocabulary_dict)
+     
+class StudyView(View):
+    def get(self,request):
+        topic_ids = request.GET.getlist('topic_id')
+        #if not topic_ids then get all topics
+        if not topic_ids:
+            topic_ids = Topic.objects.all().values_list('id', flat=True)
+        topics = Topic.objects.filter(id__in=topic_ids).order_by('id')
+        vocabularies = []
+        for topic in topics:
+            if topic.language == LanguageEnum.JAPANESE:
+                vocab_list = JPVocab.objects.filter(topic=topic).order_by('id')
+            else:
+                vocab_list = Vocabulary.objects.filter(topic=topic).order_by('id')
+            vocabularies.extend(vocab_list)
+
+        vocabulary_dict =[model_to_dict(v) for v in vocabularies]
+        for vocab in vocabulary_dict:
+            topic = topics.get(id=vocab['topic'])
+            vocab['topic_name'] = topic.name
+            vocab['lang'] = topic.language.value
+        # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
+        return render(request, 'study.html', {'vocabularies': vocabulary_dict, 'vocabulary':vocabulary_dict[0]})
+
+    def post(self, request):
+         # Lấy dữ liệu từ request
+        inputText = request.POST.get('input')
+        vocabId = request.POST.get('vocab')
+        vocabulary = Vocabulary.objects.get(id=vocabId)
+        words = re.split('\s*;\s*|\s*；\s*|\s*\n\s*',inputText)
+        incorrect_words = []
+        for word in words:
+            if len(word.strip()) != 0:
+                vocabulary.attempts_total = vocabulary.attempts_total + 1
+                #những từ trong ngoặc vuông hoặc ngoặc tròn thì không lấy để so sánh
+                _word = re.sub(r'[\(\[].*?[\)\]]', '', vocabulary.word)
+                _pronunciation = vocabulary.pronunciation
+                refer_patterns = vocabulary.refer_patterns
+                if word in refer_patterns:
+                    vocabulary.attempts_correct = vocabulary.attempts_correct + 1
+                else:
+                    if not vocabulary.attempts_incorrect:
+                        vocabulary.attempts_incorrect = []
+                    vocabulary.attempts_incorrect.append(word)
+                    incorrect_words.append(word)
+        vocabulary.save()
+        vocabulary_dict = model_to_dict(vocabulary)
+        vocabulary_dict['incorect_word_last'] = incorrect_words
+        # Trả về response là một đối tượng JSON
+        return JsonResponse(vocabulary_dict)
+#endregion
