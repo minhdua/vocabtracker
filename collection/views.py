@@ -4,7 +4,7 @@ from random import shuffle
 import random
 import urllib.parse
 import re
-
+import romaji
 from django.views import View
 from . import utils
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -56,8 +56,27 @@ def vocab_list(request, topic_id):
                     if cleaned_data['id']:
                         vocabulary = get_object_or_404(
                             Vocabulary, id=cleaned_data['id'])
-                        vocabulary.word = cleaned_data['word']
-                        vocabulary.pronunciation = cleaned_data['pronunciation']
+                        if topic.language == LanguageEnum.ENGLISH:
+                            vocabulary.word = cleaned_data['word']
+                            vocabulary.pronunciation = cleaned_data['pronunciation']
+                            vocabulary.refer_patterns = [vocabulary.word]
+
+                        if topic.language == LanguageEnum.JAPANESE:
+                            vocabulary = get_object_or_404(
+                                JPVocab, id=cleaned_data['id'])
+                            
+                            
+                            vocabulary.word = cleaned_data['word']
+                            vocabulary.pronunciation = cleaned_data['pronunciation']
+                            
+
+                            vocabulary.romaji = romaji.transliterate(vocabulary.word)
+                            vocabulary.kanji=vocabulary.pronunciation #TODO: change field after 
+                            vocabulary.katakana=None
+                            vocabulary.refer_patterns = [vocabulary.kanji, vocabulary.word]
+                            vocabulary.refer_patterns.extend(vocabulary.romaji)
+
+                        vocabulary.meaning = cleaned_data['meaning']
                         image_url = cleaned_data['image_url']
                         # Nếu image_url null thì lấy url từ utils
                         if image_url is None or image_url == '':
@@ -68,13 +87,28 @@ def vocab_list(request, topic_id):
                         vocabulary.meaning = cleaned_data['meaning']
                         vocabulary.save()
                     else:
-                        Vocabulary.objects.create(
-                            word=cleaned_data['word'],
-                            pronunciation=cleaned_data['pronunciation'],
-                            image_url = cleaned_data['image_url'],
-                            meaning=cleaned_data['meaning'],
-                            topic=topic,
-                        )
+                        if topic.language == LanguageEnum.ENGLISH:
+                            Vocabulary.objects.create(
+                                word=cleaned_data['word'],
+                                pronunciation=cleaned_data['pronunciation'],
+                                image_url = cleaned_data['image_url'],
+                                meaning=cleaned_data['meaning'],
+                                topic=topic,
+                                refer_patterns=[cleaned_data['word']],
+                            )
+                        elif topic.language == LanguageEnum.JAPANESE:
+                            romajii = romaji.transliterate(cleaned_data['word'])
+                            partterns = [cleaned_data['word'],cleaned_data['pronunciation']]
+                            partterns.extend(romajii)
+                            JPVocab.objects.create(
+                                word=cleaned_data['word'],
+                                pronunciation=cleaned_data['pronunciation'],
+                                image_url = cleaned_data['image_url'],
+                                meaning=cleaned_data['meaning'],
+                                topic=topic,
+                                kanji=cleaned_data['pronunciation'],
+                                refer_patterns= partterns,
+                            )
             return HttpResponseRedirect('/success/')
     elif request.method == 'GET':
         vocabularies_values = vocabularies.values()
