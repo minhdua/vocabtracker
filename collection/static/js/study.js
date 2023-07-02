@@ -165,6 +165,9 @@ $(document).ready(function () {
       })
 
     // save index into local storage
+    if (indexHistory) {
+      indexHistory = {}
+    }
     indexHistory[indexKey] = currentIndex
     localStorage.setItem('currentIndex', JSON.stringify(indexHistory))
   }
@@ -213,8 +216,9 @@ $(document).ready(function () {
     indexHistory = JSON.parse(localStorage.getItem('currentIndex'))
     if (indexHistory && indexHistory.hasOwnProperty(indexKey)) {
       currentIndex = indexHistory[indexKey]
+    } else {
+      indexHistory = {}
     }
-
     if (currentIndex !== undefined) {
       currentIndex = parseInt(currentIndex)
     } else {
