@@ -656,5 +656,11 @@ $(document).ready(function () {
     editModal.modal('show')
   }
 
+  $('#edit-vocabulary-form').on('keydown', function (event) {
+    if (event.which === 13) {
+      event.preventDefault() // Prevent the default form submission
+    }
+  })
+
   init()
 })
