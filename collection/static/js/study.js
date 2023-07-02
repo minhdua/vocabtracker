@@ -317,7 +317,7 @@ $(document).ready(function () {
           // Prevent the default action of the Enter key (i.e., adding a new line)
         })
       } else {
-        $('#terminal').prop('disabled', true)
+        $('#terminal').prop('disabled', false)
       }
     }
   })
