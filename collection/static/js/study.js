@@ -211,7 +211,7 @@ $(document).ready(function () {
     // get topic_id from params url
     indexKey = getKeyFromParams()
     indexHistory = JSON.parse(localStorage.getItem('currentIndex'))
-    if (indexHistory.hasOwnProperty(indexKey)) {
+    if (indexHistory && indexHistory.hasOwnProperty(indexKey)) {
       currentIndex = indexHistory[indexKey]
     }
 
