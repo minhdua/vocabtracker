@@ -10,6 +10,8 @@ urlpatterns = [
     path('topic/', views.topic, name='topic'),
     path('study/', views.study, name='study_topic'),
     path('v2/study/', StudyView.as_view(), name='study_topic_v2'),
+    path('study/update_vocabulary/',
+         views.update_vocabulary, name='update_vocabulary'),
     path('study/handle_typing/', views.handle_typing,  name='handle_typing'),
     path('review/', views.review, name='review'),
     path('review/handle_review/', views.handle_review, name='handle_review'),

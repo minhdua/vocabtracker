@@ -7,7 +7,9 @@ let currentUtterance = null
 export function speech(word, lang = LANG_JP_SPEECH, rate = DEFAULT_RATE_SPEECH) {
   if (currentUtterance && window.speechSynthesis.speaking) {
     // nếu đang trong quá trình đọc văn bản, hủy đối tượng đang đọc
-    currentUtterance.cancel()
+    if (currentUtterance) {
+      currentUtterance.cancel()
+    }
   }
   // Speech Japanese
   var msg = new SpeechSynthesisUtterance()

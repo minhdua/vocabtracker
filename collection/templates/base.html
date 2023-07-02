@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="vi" xml:lang="vi" xmlns="http://www.w3.org/1999/xhtml">
 	<head>
+		
 		<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
 		<link rel="stylesheet" href="{% static 'fontawesome/css/all.css' %}" />
 		<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
@@ -9,6 +10,9 @@
 		<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
 		<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css" />
 		<link rel="stylesheet" href="https://cdn.datatables.net/select/1.6.2/css/select.dataTables.min.css" />
+		{% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+    	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap-theme.min.css"> {% endcomment %}
+		<link rel="stylesheet" href="{% static 'css/bootstrap-tagsinput.css'%}" />
 		<title>{% block title %}Default Title{% endblock %}</title>
 		{% block include %}{% endblock %}
 		<link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png'%}" />
@@ -46,12 +50,23 @@
 		<script src="{% static 'js/bootstrap.min.js' %}"></script>
 		<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 		<script src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
-		<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+		{% comment %} <script defer src="https://pyscript.net/latest/pyscript.js"></script> {% endcomment %}
 		<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 		<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 		<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
 		<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
 		<script src="https://cdn.datatables.net/select/1.6.2/js/dataTables.select.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.min.js"></script>
+		<script src="{% static 'js/bootstrap-tagsinput.min.js'%}"></script>
+		<script src="{% static 'js/bootstrap-tagsinput-angular.min.js'%}"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/rainbow.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/generic.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/html.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/javascript.js"></script>
+		collection/static/ collection/static/js/
 		{% block scripts %}{% endblock %}
 	</body>
 </html>

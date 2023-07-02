@@ -1,8 +1,9 @@
 
+from .enums import PARTS_OF_SPEECH_CHOICES, TEST_MODE_CHOICES, LanguageEnum
+from enumchoicefield import EnumChoiceField
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from enumchoicefield import EnumChoiceField
-from .enums import PARTS_OF_SPEECH_CHOICES, TEST_MODE_CHOICES, LanguageEnum
+kanji_details = models.JSONField(blank=True, null=True)
 
 
 class Topic(models.Model):
@@ -44,11 +45,38 @@ class Vocabulary(models.Model):
     uncheck_ifnull = models.BooleanField(default=False)
 
 
+class SinoVietnameseProperty(models.Model):
+    strokes = models.IntegerField(default=0)
+    radical = models.CharField(max_length=255, null=True, blank=True)
+    pen_strokes = models.CharField(max_length=255, null=True, blank=True)
+    shape = models.CharField(max_length=255, null=True, blank=True)
+    unicode = models.CharField(max_length=255, null=True, blank=True)
+    frequency = models.IntegerField(default=0)
+
+
+class Kanji(models.Model):
+    character = models.CharField(max_length=255, null=True, blank=True)
+    meaning = models.CharField(max_length=255)
+    sino_vietnamese = models.CharField(max_length=255, null=True, blank=True)
+    properties = models.ForeignKey(
+        SinoVietnameseProperty, on_delete=models.CASCADE, related_name='kanji')
+    onyomi = ArrayField(models.CharField(
+        max_length=255), blank=True, null=True, default=list)
+    kunyomi = ArrayField(models.CharField(
+        max_length=255), blank=True, null=True, default=list)
+    examples = ArrayField(models.CharField(
+        max_length=255), blank=True, null=True, default=list)
+
+
 class JPVocab(Vocabulary):
     kanji = models.CharField(max_length=255, blank=True, null=True)
-    katakana = models.CharField(max_length=255, blank=True, null=True)
+    sino_viet = models.CharField(max_length=255, blank=True, null=True)
+    kanji_details = models.JSONField(blank=True, null=True)
     romaji = models.CharField(max_length=255, blank=True, null=True)
-    hiragana = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.kanji
+
 
 # class EngVocab(Vocabulary):
 #     word = models.CharField(max_length=255, blank=True, null=True)

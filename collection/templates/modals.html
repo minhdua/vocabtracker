@@ -116,3 +116,191 @@
 		</div>
 	</div>
 </div>
+
+<div class="modal fade" id="kanji-info-modal" tabindex="-1" aria-labelledby="kanjiInfoModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="kanjiInfoModalLabel">Kanji Information</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<!-- Popup container -->
+				<div id="popupContainer" class="popup">
+				
+					<!-- Kanji label and value -->
+					<p>
+					<strong>Kanji:</strong>
+					<span id="kanjiValue" style="font-size: 36pt;">[Kanji Value]</span>
+					</p>
+				
+					<!-- Onyumi label and value -->
+					<p>
+					<strong>Onyumi:</strong>
+					<span id="onyumiValue">[Onyumi Value]</span>
+					</p>
+				
+					<!-- Kunyumi label and value -->
+					<p>
+					<strong>Kunyumi:</strong>
+					<span id="kunyumiValue">[Kunyumi Value]</span>
+					</p>
+				
+					<!-- Meaning label and value -->
+					<p>
+					<strong>Meaning:</strong>
+					<span id="meaningValue">[Meaning Value]</span>
+					</p>
+				
+					<!-- Sino-Vietnamese label and value -->
+					<p>
+					<strong>Sino-Vietnamese:</strong>
+					<span id="sinoVietnameseValue">[Sino-Vietnamese Value]</span>
+					</p>
+				
+					<!-- Properties label and table -->
+					<p>
+					<strong>Properties:</strong>
+					</p>
+					<table>
+					<tr>
+						<th>Shape</th>
+						<th>Radical</th>
+						<th>Strokes</th>
+						<th>Unicode</th>
+						<th>Pen Strokes</th>
+					</tr>
+					<tr>
+						<td id="shapeValue">[Shape Value]</td>
+						<td id="radicalValue">[Radical Value]</td>
+						<td id="strokesValue">[Strokes Value]</td>
+						<td id="unicodeValue">[Unicode Value]</td>
+						<td id="penStrokesValue">[Pen Strokes Value]</td>
+					</tr>
+					</table>
+				</div>
+  
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="edit-vocabulary-modal" tabindex="-1" aria-labelledby="editVocabularyModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+	  <div class="modal-content">
+		<form id="edit-vocabulary-form" enctype="multipart/form-data" method="post" action="/study/update_vocabulary/">
+		  {% csrf_token %}
+		  <div class="modal-header">
+			<h5 class="modal-title" id="editVocabularyModalLabel">Edit Vocabulary</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<!-- Edit Vocabulary form fields -->
+			<div class="mb-3">
+			  <label for="edit-vocabulary-word" class="form-label">Word</label>
+			  <input type="text" id="edit-vocabulary-word" class="form-control" name="word" required />
+			</div>
+			<div id="language-jp-container">
+				
+				<div class="mb-3">
+				<label for="edit-vocabulary-kanji" class="form-label">Kanji</label>
+				<input type="text" id="edit-vocabulary-kanji" class="form-control" name="kanji" />
+					<div class="form-check mb-3">
+					<input type="checkbox" class="form-check-input" id="edit-vocabulary-auto-update-kanji" name="auto_update_kanji" />
+					<label class="form-check-label" for="edit-vocabulary-auto-update-kanji" style="font-size: 10pt; font-style: italic;">Auto Update Kanji</label>
+			  	</div>
+			</div>
+				
+				<div class="mb-3">
+					<label for="edit-vocabulary-sino-viet" class="form-label">Sino Vietnamese</label>
+					<input type="text" id="edit-vocabulary-sino-viet" class="form-control" name="sino_viet" />
+					<div class="form-check mb-3">
+						<input type="checkbox" class="form-check-input" id="edit-vocabulary-auto-update-sino-viet" name="auto_update_sino_viet" />
+						<label class="form-check-label" for="edit-vocabulary-auto-update-sino-viet" style="font-size: 10pt; font-style: italic;">Auto Update Sino-Vietnamese</label>
+			  		</div>
+				</div>
+				<div class="mb-3">
+					
+				<label for="edit-vocabulary-romaji" class="form-label">Romaji</label>
+				<select id="edit-vocabulary-romaji" class="form-control" name="romaji">
+					<option value="new"> New </option>
+					<!-- Add more options as needed -->
+				</select>
+				</div>
+			</div>
+			<div id="language-other-container">
+				<div class="mb-3">
+				<label for="edit-vocabulary-pronunciation" class="form-label">Pronunciation</label>
+				<input type="text" id="edit-vocabulary-pronunciation" class="form-control" name="pronunciation" />
+				</div>
+				<div class="mb-3">
+				<label for="edit-vocabulary-parts-of-speech" class="form-label">Parts of Speech</label>
+				<select id="edit-vocabulary-parts-of-speech" class="form-control" name="parts_of_speech">
+					<option value="noun"> Noun </option>
+					<option value="verb"> Verb </option>
+					<option value="adjective"> Adjective </option>
+					<option value="adverb"> Adverb </option>
+					<option value="preposition"> Preposition </option>
+					<option value="conjunction"> Conjunction </option>
+					<option value="interjection"> Interjection </option>
+					<!-- Add more options as needed -->
+				</select>
+				</div>
+			</div>
+			<div class="mb-3">
+			  <label for="edit-vocabulary-meaning" class="form-label">Meaning</label>
+			  <textarea class="form-control" id="edit-vocabulary-meaning" name="meaning"></textarea>
+			</div>
+			<div class="mb-3">
+			  <label for="edit-vocabulary-note" class="form-label">Note</label>
+			  <input type="text" id="edit-vocabulary-note" class="form-control" name="note" />
+			</div>
+			<div class="mb-3">
+				<label for="edit-vocabulary-examples" class="form-label">Examples</label>
+				<input type="text" value="" id="edit-vocabulary-examples" class="form-control" name="examples" data-role="tagsinput" />
+			  </div>
+			  <div class="mb-3">
+				<label for="edit-vocabulary-synonyms" class="form-label">Synonyms</label>
+				<input type="text" id="edit-vocabulary-synonyms" class="form-control" name="synonyms" data-role="tagsinput" />
+			  </div>
+			  <div class="mb-3">
+				<label for="edit-vocabulary-antonyms" class="form-label">Antonyms</label>
+				<input type="text" id="edit-vocabulary-antonyms" class="form-control" name="antonyms" data-role="tagsinput" />
+			  </div>
+			  <div class="mb-3">
+				<label for="edit-vocabulary-refer-patterns" class="form-label">Refer Patterns</label>
+				<input type="text" id="edit-vocabulary-refer-patterns" class="form-control" name="refer_patterns" data-role="tagsinput" />
+			  </div>
+			<div class="mb-3">
+			  <label for="edit-vocabulary-image-url" class="form-label">Image URL</label>
+			  <input type="text" id="edit-vocabulary-image-url" class="form-control" name="image_url" />
+			</div>
+			<div class="form-check-inline">
+				<div class="form-check mb-3">
+				  <input type="checkbox" class="form-check-input" id="edit-vocabulary-flag" name="flag" />
+				  <label class="form-check-label" style="font-size: 10pt; font-style: italic;" for="edit-vocabulary-flag">Flag</label>
+				</div>
+			</div>
+			<div class="form-check-inline">
+				<div class="form-check mb-3">
+					<input type="checkbox" class="form-check-input" id="edit-vocabulary-not-review-if-null" name="uncheck_ifnull" />
+					<label class="form-check-label" style="font-size: 10pt; font-style: italic;" for="edit-vocabulary-not-review-if-null">Not Review If Null</label>
+				</div>
+			</div>
+			 
+			<input type="hidden" id="edit-vocabulary-id" name="id" value="" />
+			<input type="hidden" id="edit-vocabulary-topic-id" name="topic_id" value="" />
+			<input type="hidden" id="current-url" value="{{ request.get_full_path  }}" name="current_url" />
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+			<button type="submit" id="edit-vocabulary-save" class="btn btn-primary">Edit</button>
+		  </div>
+		</form>
+	  </div>
+	</div>
+  </div>
+  

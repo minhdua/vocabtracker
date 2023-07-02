@@ -8,13 +8,15 @@ $(document).ready(function () {
   var isRepeat = true
   var intervalId = null
   var currentIndex = 0
-
+  var indexKey = ''
+  var indexHistory = {}
   let timer
   let startTime
   var path = window.location.pathname
   var mode = 0 //normal
   var pausedTime = null
-
+  var kanjiModal = $('#kanji-info-modal')
+  var editModal = $('#edit-vocabulary-modal')
   function updateAttemptsTotal() {
     var attempts_total = 0
     var attempts_correct = 0
@@ -29,7 +31,6 @@ $(document).ready(function () {
     $('#total-checks').text(`${check_correct}/${checks_total}`)
     $('#total-correct').text(`${attempts_correct}/${attempts_total}`)
   }
-  init()
 
   function getCurrentWord() {
     return vocabularies[currentIndex]
@@ -55,6 +56,41 @@ $(document).ready(function () {
     }
   }
 
+  function showKanjiInfo(kanji_word) {
+    var currentWord = getCurrentWord()
+    // Example values
+    if (!currentWord.kanji_details) {
+      currentWord.kanji_details = []
+    }
+    var detail = currentWord.kanji_details.find((item) => item.character === kanji_word)
+    if (detail == null) {
+      return
+    }
+    var kanji = detail.character
+    var onyumi = detail.onyomi
+    var kunyumi = detail.kunyomi
+    var meaning = detail.meaning
+    var sinoVietnamese = detail.sino_vietnamese
+    var shape = detail.properties.shape
+    var radical = detail.properties.radical
+    var strokes = detail.properties.strokes
+    var unicode = detail.properties.unicode
+    var penStrokes = detail.properties.pen_strokes
+
+    // Update the popup content with the example values
+    document.getElementById('kanjiValue').textContent = kanji
+    document.getElementById('onyumiValue').textContent = onyumi.join(', ')
+    document.getElementById('kunyumiValue').textContent = kunyumi.join(', ')
+    document.getElementById('meaningValue').textContent = meaning.join(', ')
+    document.getElementById('sinoVietnameseValue').textContent = sinoVietnamese
+    document.getElementById('shapeValue').textContent = shape
+    document.getElementById('radicalValue').textContent = radical
+    document.getElementById('strokesValue').textContent = strokes
+    document.getElementById('unicodeValue').textContent = unicode
+    document.getElementById('penStrokesValue').textContent = penStrokes
+    kanjiModal.modal('show')
+  }
+
   function displayWord() {
     if (!vocabularies || vocabularies.length === 0) {
       return
@@ -67,6 +103,7 @@ $(document).ready(function () {
     $('#pronunciation').text(currentWord.pronunciation)
     $('#kanji').text(currentWord.kanji)
     $('#romaji').text(currentWord.romaji)
+    $('#sino-viet').text(currentWord.sino_viet)
     $('#image img').attr('src', currentWord.image_url || '/static/images/default-image.png')
     $('#correct-attempts').text(`${currentWord.attempts_correct || 0}/${currentWord.attempts_total || 0}`)
     $('#correct-checks').text(`${currentWord.checks_correct || 0}/${currentWord.checks_total || 0}`)
@@ -88,6 +125,48 @@ $(document).ready(function () {
     } else {
       $('th i.fa-bookmark').attr('hidden', true)
     }
+
+    // set link for kanji
+    var kanjiText = $('td#kanji').text()
+    if (!currentWord.kanji_details) {
+      currentWord.kanji_details = []
+    }
+    for (var i = 0; i < currentWord.kanji_details.length; i++) {
+      var character = currentWord.kanji_details[i].character
+      // create a tag
+      var kanjiLink = $('<a></a>')
+
+      // set href = # to prevent page reload
+      kanjiLink.attr('href', '')
+      // set onclick event and prevent page reload
+      // kanjiLink.attr('onclick', 'showKanjiInfo($this); return false;')
+      // set class for a tag
+      kanjiLink.addClass('kanji-link')
+      // set id for a tag
+      kanjiLink.attr('id', character)
+      // set text for a tag
+      kanjiLink.text(character)
+      // set style for tag
+      kanjiLink.css('color', 'red')
+      // set no underline for tag
+      kanjiLink.css('text-decoration', 'none')
+      // replace kanji text with a tag
+      kanjiText = kanjiText.replace(character, kanjiLink.prop('outerHTML'))
+    }
+    // set event for all kanji link
+    $('td#kanji').html(kanjiText)
+    $('td#kanji')
+      .find('a.kanji-link')
+      .unbind('click')
+      .click(function () {
+        var kanji_word = $(this).text()
+        showKanjiInfo(kanji_word)
+        return false
+      })
+
+    // save index into local storage
+    indexHistory[indexKey] = currentIndex
+    localStorage.setItem('currentIndex', JSON.stringify(indexHistory))
   }
 
   function checkOnOffButton() {
@@ -109,15 +188,43 @@ $(document).ready(function () {
     }
   }
 
+  function getKeyFromParams() {
+    var queryString = window.location.search
+
+    // Parse the query string parameters into an object
+    var params = new URLSearchParams(queryString)
+
+    // Get all the values of the 'topic_id' parameter
+    var topicIds = params.getAll('topic_id')
+
+    // order asc topic_ids
+    topicIds.sort(function (a, b) {
+      return a - b
+    })
+
+    return topicIds.join('-')
+  }
+
   function init() {
     vocabularies = JSON.parse($('#vocabularies-data').val())
-    // get first word has flag = true
-    for (var i = 0; i < vocabularies.length; i++) {
-      if (vocabularies[i].flag) {
-        currentIndex = i
-        break
+
+    // get topic_id from params url
+    indexKey = getKeyFromParams()
+    indexHistory = JSON.parse(localStorage.getItem('currentIndex'))
+
+    currentIndex = indexHistory[indexKey]
+    if (currentIndex !== undefined) {
+      currentIndex = parseInt(currentIndex)
+    } else {
+      // get first word has flag = true
+      for (var i = 0; i < vocabularies.length; i++) {
+        if (vocabularies[i].flag) {
+          currentIndex = i
+          break
+        }
       }
     }
+
     displayWord()
   }
 
@@ -173,6 +280,7 @@ $(document).ready(function () {
       e.preventDefault()
     } else if (e.keyCode == 13 && !e.ctrlKey) {
       e.preventDefault()
+      $('#terminal').prop('disabled', true)
       var word = getCurrentWord()
       // Enter key pressed without control key or Shift key
       var textareaText = $(this).val()
@@ -189,15 +297,21 @@ $(document).ready(function () {
             vocabularies[currentIndex] = data
             displayWord()
             clearInput()
+            $('#terminal').prop('disabled', false)
+            $('#terminal').focus()
             showError(data.incorect_word_last)
           },
           error: function (xhr, status, error) {
             // Xử lý lỗi nếu có
             console.error(error)
+            $('#terminal').prop('disabled', false)
+            $('#terminal').focus()
             clearInput()
           }
           // Prevent the default action of the Enter key (i.e., adding a new line)
         })
+      } else {
+        $('#terminal').prop('disabled', true)
       }
     }
   })
@@ -326,8 +440,19 @@ $(document).ready(function () {
         pauseTimer()
         stopInterval()
         isCommands = true
+      } else if (line.startsWith('/update') || line.startsWith('/modyfy') || line.startsWith('/edit')) {
+        displayEditModal()
+        clearInput()
+        isCommands = true
       }
     }
+    $('a.kanji-link')
+      .unbind('click')
+      .click(function () {
+        var kanji_word = $(this).text()
+        showKanjiInfo(kanji_word)
+        return false
+      })
     return isCommands
   }
 
@@ -413,4 +538,117 @@ $(document).ready(function () {
     },
     'base64'
   )
+
+  function displayEditModal() {
+    var currentWord = getCurrentWord()
+    editModal.find('#edit-vocabulary-word').val(currentWord.word)
+    editModal.find('#edit-vocabulary-pronunciation').val(currentWord.pronunciation)
+    editModal.find('#edit-vocabulary-kanji').val(currentWord.kanji)
+    editModal.find('#edit-vocabulary-parts-of-speech').val(currentWord.parts_of_speech)
+
+    for (let i = 0; i < currentWord.refer_patterns.length; i++) {
+      var newOption = $('<option></option>')
+      newOption.attr('value', currentWord.refer_patterns[i])
+      newOption.text(currentWord.refer_patterns[i])
+      editModal.find('#edit-vocabulary-romaji').append(newOption)
+    }
+
+    if (!currentWord.refer_patterns.includes(currentWord.romaji)) {
+      editModal.find('#edit-vocabulary-romaji').append(currentWord.romaji)
+    }
+
+    if (!currentWord.romaji || currentWord.romaji === 'new') {
+      editModal.find('#edit-vocabulary-romaji').val('new')
+      var newInput = $('<input type="text" class="form-control" id="new-romaji-option" name="new_romaji" placeholder="Enter new romaji" required>')
+      editModal.find('#edit-vocabulary-romaji').after(newInput)
+    } else {
+      editModal.find('#edit-vocabulary-romaji').val(currentWord.romaji)
+    }
+
+    editModal.find('#edit-vocabulary-romaji').on('change', function () {
+      var selectValue = $(this).val()
+      var existingInput = editModal.find('#new-romaji-option')
+      if (existingInput) {
+        existingInput.remove()
+      }
+
+      if (selectValue === 'new') {
+        var newInput = $('<input type="text" class="form-control" id="new-romaji-option" name="new_romaji" placeholder="Enter new romaji" style="margin-top:5px" required>')
+        editModal.find('#edit-vocabulary-romaji').after(newInput)
+      }
+    })
+
+    editModal.find('#edit-vocabulary-meaning').val(currentWord.meaning)
+    editModal.find('#edit-vocabulary-note').val(currentWord.note)
+    var examples = currentWord.examples ? currentWord.examples.join(',') : ''
+    var synonyms = currentWord.synonyms ? currentWord.synonyms.join(',') : ''
+    var antonyms = currentWord.antonyms ? currentWord.antonyms.join(',') : ''
+    var referPatterns = currentWord.refer_patterns ? currentWord.refer_patterns.join(',') : ''
+    editModal.find('#edit-vocabulary-examples').tagsinput('add', examples)
+    editModal.find('#edit-vocabulary-synonyms').tagsinput('add', synonyms)
+    editModal.find('#edit-vocabulary-antonyms').tagsinput('add', antonyms)
+    editModal.find('#edit-vocabulary-refer-patterns').tagsinput('add', referPatterns)
+
+    editModal.find('#edit-vocabulary-examples').attr('value', examples)
+    editModal.find('#edit-vocabulary-synonyms').attr('value', synonyms)
+    editModal.find('#edit-vocabulary-antonyms').attr('value', antonyms)
+    editModal.find('#edit-vocabulary-refer-patterns').attr('value', referPatterns)
+
+    editModal
+      .find(
+        '#edit-vocabulary-examples, \
+                    #edit-vocabulary-synonyms, \
+                    #edit-vocabulary-antonyms, \
+                    #edit-vocabulary-refer-patterns'
+      )
+      .on('itemAdded', function (event) {
+        var items = $(this).tagsinput('items')
+        if (!items) {
+          items = []
+        }
+        $(this).attr('value', items.join(','))
+      })
+      .on('itemRemoved', function (event) {
+        var items = $(this).tagsinput('items')
+        if (!items) {
+          items = []
+        }
+        $(this).attr('value', items.join(','))
+      })
+    editModal.find('#edit-vocabulary-image-url').val(currentWord.image_url)
+    editModal.find('#edit-vocabulary-flag').prop('checked', currentWord.flag)
+    editModal.find('#edit-vocabulary-not-review-if-null').prop('checked', currentWord.uncheck_ifnull)
+    editModal.find('#edit-vocabulary-id').val(currentWord.id)
+    editModal.find('#edit-vocabulary-topic-id').val(currentWord.topic)
+    editModal.find('#edit-vocabulary-sino-viet').val(currentWord.sino_viet)
+    editModal.find('#edit-vocabulary-vietnamese').val(currentWord.vietnamese)
+
+    if (currentWord.lang === 'JA') {
+      editModal.find('#language-jp-container').show()
+      editModal.find('#language-other-container').hide()
+    } else {
+      editModal.find('#language-jp-container').hide()
+      editModal.find('#language-other-container').show()
+    }
+
+    editModal.find('#edit-vocabulary-auto-update-kanji').change(function () {
+      if ($(this).is(':checked')) {
+        editModal.find('#edit-vocabulary-kanji').prop('disabled', true)
+      } else {
+        editModal.find('#edit-vocabulary-kanji').prop('disabled', false)
+      }
+    })
+
+    editModal.find('#edit-vocabulary-auto-update-sino-viet').change(function () {
+      if ($(this).is(':checked')) {
+        editModal.find('#edit-vocabulary-sino-viet').prop('disabled', true)
+      } else {
+        editModal.find('#edit-vocabulary-sino-viet').prop('disabled', false)
+      }
+    })
+
+    editModal.modal('show')
+  }
+
+  init()
 })

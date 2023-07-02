@@ -82,3 +82,8 @@ djhtml <template.html>
 - Twitter: [@minhdua](https://twitter.com/minhdua)
 - LinkedIn: [minhdua](https://www.linkedin.com/in/minhdua/)
 - Project Management: [https://github.com/minhdua/projects](https://github.com/minhdua)
+
+### Tham khảo
+
+1. [kanjidic-index](https://github.com/macalinao/kanjidic-index) repository by Macalinao.
+2. [KanjiDictVN](https://github.com/trungnt2910/KanjiDictVN) repository.

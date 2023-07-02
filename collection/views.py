@@ -15,7 +15,7 @@ from Levenshtein import distance
 
 from .enums import TEST_MODE_CHOICES, LanguageEnum
 from .forms import TopicForm, VocabularyForm
-from .models import JPVocab, Topic, Vocabulary
+from .models import JPVocab, Kanji, Topic, Vocabulary
 
 VocabularyFormSet = formset_factory(VocabularyForm, extra=0)
 
@@ -35,86 +35,101 @@ def vocab_list(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     if topic.language == LanguageEnum.JAPANESE:
         vocabularies = JPVocab.objects.filter(topic=topic).order_by('id').values()
-        
+    
     # elif topic.language == 'EN': TODO: add EN
     #     vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
     else:
         vocabularies = Vocabulary.objects.filter(topic=topic).order_by('id').values()
-    if request.method == 'POST':
-        formset = VocabularyFormSet(request.POST)
-        if formset.is_valid():
-            # Delete vocabulary not exist in cleaned_data
-            vocabulary_ids = [form.cleaned_data.get(
-                'id') for form in formset if form.cleaned_data.get('id')]
-            deleted_vocabularies = Vocabulary.objects.filter(
-                topic=topic).exclude(id__in=vocabulary_ids)
-            deleted_vocabularies.delete()
-            for form in formset:
-                if form.is_valid():
-                    cleaned_data = form.cleaned_data
-                    # check if vocabulary already exists
-                    if cleaned_data['id']:
-                        vocabulary = get_object_or_404(
-                            Vocabulary, id=cleaned_data['id'])
-                        if topic.language == LanguageEnum.ENGLISH:
-                            vocabulary.word = cleaned_data['word']
-                            vocabulary.pronunciation = cleaned_data['pronunciation']
-                            vocabulary.refer_patterns = [vocabulary.word]
+    kanji_path = 'collection/resources/json/kanji_bank.json'
+    with open(kanji_path, 'r', encoding='utf-8') as f:
+        kanji_bank = json.load(f)
+        if request.method == 'POST':
+            formset = VocabularyFormSet(request.POST)
+            if formset.is_valid():
+                # Delete vocabulary not exist in cleaned_data
+                vocabulary_ids = [form.cleaned_data.get(
+                    'id') for form in formset if form.cleaned_data.get('id')]
+                deleted_vocabularies = Vocabulary.objects.filter(
+                    topic=topic).exclude(id__in=vocabulary_ids)
+                deleted_vocabularies.delete()
 
-                        if topic.language == LanguageEnum.JAPANESE:
+                for form in formset:
+                    if form.is_valid():
+                        cleaned_data = form.cleaned_data
+                        # check if vocabulary already exists
+                        if cleaned_data['id']:
                             vocabulary = get_object_or_404(
-                                JPVocab, id=cleaned_data['id'])
-                            
-                            
-                            vocabulary.word = cleaned_data['word']
-                            vocabulary.pronunciation = cleaned_data['pronunciation']
-                            
+                                Vocabulary, id=cleaned_data['id'])
+                            if topic.language == LanguageEnum.ENGLISH:
+                                vocabulary.word = cleaned_data['word']
+                                vocabulary.pronunciation = cleaned_data['pronunciation']
+                                vocabulary.refer_patterns = [vocabulary.word]
 
-                            vocabulary.romaji = romaji.transliterate(vocabulary.word)
-                            vocabulary.kanji=vocabulary.pronunciation #TODO: change field after 
-                            vocabulary.katakana=None
-                            vocabulary.refer_patterns = [vocabulary.kanji, vocabulary.word]
-                            vocabulary.refer_patterns.extend(vocabulary.romaji)
+                            if topic.language == LanguageEnum.JAPANESE:
+                                vocabulary = get_object_or_404(
+                                    JPVocab, id=cleaned_data['id'])
+                                
+                                
+                                vocabulary.word = cleaned_data['word']
+                                vocabulary.pronunciation = cleaned_data['pronunciation']
 
-                        vocabulary.meaning = cleaned_data['meaning']
-                        image_url = cleaned_data['image_url']
-                        # Nếu image_url null thì lấy url từ utils
-                        if image_url is None or image_url == '':
-                            images = utils.extract_urls('image for vocabulary '+vocabulary.meaning,limit=10)
-                             #get random 1 image
-                            image_url =  random.choice(images[2:])
-                        vocabulary.image_url = image_url
-                        vocabulary.meaning = cleaned_data['meaning']
-                        vocabulary.save()
-                    else:
-                        if topic.language == LanguageEnum.ENGLISH:
-                            Vocabulary.objects.create(
-                                word=cleaned_data['word'],
-                                pronunciation=cleaned_data['pronunciation'],
-                                image_url = cleaned_data['image_url'],
-                                meaning=cleaned_data['meaning'],
-                                topic=topic,
-                                refer_patterns=[cleaned_data['word']],
-                            )
-                        elif topic.language == LanguageEnum.JAPANESE:
-                            romajii = romaji.transliterate(cleaned_data['word'])
-                            partterns = [cleaned_data['word'],cleaned_data['pronunciation']]
-                            partterns.extend(romajii)
-                            JPVocab.objects.create(
-                                word=cleaned_data['word'],
-                                pronunciation=cleaned_data['pronunciation'],
-                                image_url = cleaned_data['image_url'],
-                                meaning=cleaned_data['meaning'],
-                                topic=topic,
-                                kanji=cleaned_data['pronunciation'],
-                                refer_patterns= partterns,
-                            )
-            return HttpResponseRedirect('/success/')
-    elif request.method == 'GET':
-        vocabularies_values = vocabularies.values()
-        formset = VocabularyFormSet(initial=vocabularies_values)
-    else:
-        formset = VocabularyFormSet()
+                                romaijii = romaji.transliterate(vocabulary.word)
+                                # if romajii len > 0 then get first else none
+                                vocabulary.romaji = romaijii[0] if len(romaijii) > 0 else None
+                                vocabulary.kanji=vocabulary.pronunciation #TODO: change field after 
+                                vocabulary.refer_patterns = [vocabulary.kanji, vocabulary.word]
+                                vocabulary.refer_patterns.extend(vocabulary.romaji)
+                                kanji = utils.find_item_by_key(kanji_bank,vocabulary.kanji,'character')
+                                sino_viet, kanji_detail = utils.get_sino_viet(kanji_bank,kanji)
+                                vocabulary.sino_viet = sino_viet
+                                vocabulary.kanji_details = kanji_detail if kanji_detail else []
+
+                            vocabulary.meaning = cleaned_data['meaning']
+                            image_url = cleaned_data['image_url']
+                            # Nếu image_url null thì lấy url từ utils
+                            if image_url is None or image_url == '':
+                                images = utils.extract_urls('image for vocabulary '+vocabulary.meaning,limit=10)
+                                #get random 1 image
+                                image_url =  random.choice(images[2:])
+                            vocabulary.image_url = image_url
+                            vocabulary.meaning = cleaned_data['meaning']
+                            vocabulary.save()
+                        else:
+                            if topic.language == LanguageEnum.ENGLISH:
+                                Vocabulary.objects.create(
+                                    word=cleaned_data['word'],
+                                    pronunciation=cleaned_data['pronunciation'],
+                                    image_url = cleaned_data['image_url'],
+                                    meaning=cleaned_data['meaning'],
+                                    topic=topic,
+                                    refer_patterns=[cleaned_data['word']],
+                                )
+                            elif topic.language == LanguageEnum.JAPANESE:
+                                romajii = romaji.transliterate(cleaned_data['word'])
+                                partterns = [cleaned_data['word'],cleaned_data['pronunciation']] # TODO: pronouciation is not in language JP
+                                partterns.extend(romajii)
+                                # kanji = utils.find_item_by_key(kanji_bank,cleaned_data['pronunciation'],'character')
+                                kanji = cleaned_data['pronunciation']
+                                sino_viet, kanji_details = utils.get_sino_viet(kanji_bank,kanji)
+                                
+                                JPVocab.objects.create(
+                                    word=cleaned_data['word'],
+                                    pronunciation=cleaned_data['pronunciation'],
+                                    image_url = cleaned_data['image_url'],
+                                    meaning=cleaned_data['meaning'],
+                                    topic=topic,
+                                    kanji=kanji,
+                                    refer_patterns= partterns,
+                                    romaji=romajii[0] if len(romajii) > 0 else None,
+                                    sino_viet=sino_viet,
+                                    kanji_details = kanji_details if kanji_details else [],
+                                )
+                return HttpResponseRedirect('/success/')
+        elif request.method == 'GET':
+            vocabularies_values = vocabularies.values()
+            formset = VocabularyFormSet(initial=vocabularies_values)
+        else:
+            formset = VocabularyFormSet()
     return render(request, 'add.html', {'formset': formset, 'topic': topic})
 
 def topic_search(request):
@@ -375,6 +390,7 @@ class StudyView(View):
             topic = topics.get(id=vocab['topic'])
             vocab['topic_name'] = topic.name
             vocab['lang'] = topic.language.value
+        
         # return JsonResponse({'vocabularies': vocabulary_dict}, safe=False)
         return render(request, 'study.html', {'vocabularies': vocabulary_dict, 'vocabulary':vocabulary_dict[0]})
 
@@ -404,4 +420,62 @@ class StudyView(View):
         vocabulary_dict['incorect_word_last'] = incorrect_words
         # Trả về response là một đối tượng JSON
         return JsonResponse(vocabulary_dict)
+#endregion
+
+#region Vocabulary 
+def update_vocabulary(request):
+    if request.method == "POST":
+        # Lấy dữ liệu từ request
+        kanji_bank_path = 'collection/resources/json/kanji_bank.json'
+        kanji_dict_dir_path = 'collection/resources/json/dict/'
+        kanji_bank = utils.load_json_from_path(kanji_bank_path)
+        kanji_dict = utils.load_json_from_path(kanji_dict_dir_path)
+        current_url = request.POST.get('current_url')
+        vocab_id = request.POST.get('id')
+        topic_id = request.POST.get('topic_id')
+        topic = Topic.objects.get(id=topic_id)
+        if topic.language == LanguageEnum.JAPANESE:
+            vocabulary = JPVocab.objects.get(id=vocab_id)
+            romaji = request.POST.get('romaji')
+
+            if romaji == 'new':
+                vocabulary.romaji = request.POST.get('new_romaji')
+            else:
+                vocabulary.romaji = romaji
+
+            if request.POST.get('auto_update_kanji') is not None:
+                kanji = utils.find_item_by_key(kanji_dict, vocabulary.word, 'Kana')
+                vocabulary.kanji = kanji['Kanji'] if kanji else ''
+            else:
+                vocabulary.kanji = request.POST.get('kanji')
+
+            if request.POST.get('auto_update_sino_viet') is not None:
+                sino_viet, kanji_details = utils.get_sino_viet(kanji_bank, vocabulary.kanji)
+                vocabulary.sino_viet = sino_viet
+                vocabulary.kanji_details = kanji_details
+            else :
+                vocabulary.sino_viet = request.POST.get('sino_viet')
+                
+        else:
+            vocabulary = Vocabulary.objects.get(id=vocab_id)
+            vocabulary.pronunciation = request.POST.get('pronunciation')
+            vocabulary.parts_of_speech = request.POST.get('parts_of_speech')
+            
+        vocabulary.word = request.POST.get('word')
+        vocabulary.meaning = request.POST.get('meaning')
+        vocabulary.examples = request.POST.get('examples').split(',')
+        vocabulary.note = request.POST.get('note')
+        vocabulary.synonyms = request.POST.get('synonyms').split(',')
+        vocabulary.antonyms = request.POST.get('antonyms').split(',')
+        vocabulary.refer_patterns = request.POST.get('refer_patterns').split(',')
+        vocabulary.image_url = request.POST.get('image_url')
+        vocabulary.flag = request.POST.get('flag') is not None
+        vocabulary.uncheck_ifnull = request.POST.get('uncheck_ifnull') is not None
+        vocabulary.save()
+        # Trả về response là một đối tượng JSON
+        # return JsonResponse({'success': True, 'vocabulary': model_to_dict(vocabulary)})
+        return redirect(current_url)
+    else:
+        return JsonResponse({'success': False})
+        
 #endregion

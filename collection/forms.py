@@ -21,7 +21,7 @@ class JPVocabForm(forms.ModelForm):
     class Meta:
         model = JPVocab
         fields = ['id', 'word', 'pronunciation', 'meaning',
-                  'image_url', 'kanji', 'hiragana', 'katakana', 'romaji']
+                  'image_url', 'kanji', 'romaji']
 
 
 class TopicForm(forms.ModelForm):

@@ -1,4 +1,6 @@
+import json
 import os
+import re
 import urllib.request
 from typing import List
 
@@ -50,3 +52,47 @@ def extract_urls(keyword: str, filetype: str = 'png', limit: int = 1, offset: in
         end_object += 1
 
     return urls
+
+
+def is_kanji(word):
+    # Define the regular expression pattern for kanji characters
+    kanji_pattern = re.compile(r'[\u4E00-\u9FFF]+')
+
+    # Check if the word contains kanji characters
+    match = kanji_pattern.search(word)
+    return match is not None
+
+
+def find_item_by_key(items, word, key):
+    for item in items:
+        if item[key] == word:
+            return item
+    return None
+
+
+def get_sino_viet(kanji_bank, kanji):
+    kanji_characters = [
+        find_item_by_key(kanji_bank, char, 'character') for char in kanji if char.isalpha() and is_kanji(char)]
+    sino_viet_characters = [char.get('sino_vietnamese').replace(' ', '/ ')
+                            for char in kanji_characters if char is not None]
+    sino_viet_details = [
+        char for char in kanji_characters if char is not None]
+    sino_viet = ' '.join(sino_viet_characters)
+    return sino_viet, sino_viet_details
+
+def load_json_from_path(path):
+    if os.path.isfile(path):  # Kiểm tra xem đường dẫn là một tệp tin
+        with open(path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
+    elif os.path.isdir(path):  # Kiểm tra xem đường dẫn là một thư mục
+        data = []
+        for file_name in os.listdir(path):
+            file_path = os.path.join(path, file_name)
+            if os.path.isfile(file_path) and file_name.endswith('.json'):  # Lọc các tệp tin có phần mở rộng .json
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    file_data = json.load(file)
+                data.extend(file_data)
+        return data
+    else:
+        raise ValueError("Invalid path: " + path)
