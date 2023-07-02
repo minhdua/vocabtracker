@@ -3,13 +3,13 @@
 {% endblock %} {% block content %}
 {% include 'modals.html' %}
 <div class="container">
-	<h1 id="topic-name">{{vocabulary.topic_name}}</h1>
+	<h1 id="topic-name" style="text-align: center;">{{vocabulary.topic_name}}</h1>
 	<!-- <embed src="{% static 'pdfs/Toiec.pdf' %}" type="application/pdf" width="100%" height="600px" /> -->
-	<div class="navigation">
+	{% comment %} <div class="navigation">
 		<button id="prev-btn" disabled>&lt; Previous</button>
 		<button id="sound-btn">Sound On</button>
 		<button id="next-btn">Next &gt;</button>
-	</div>
+	</div> {% endcomment %}
 	
 	{% if vocabulary.lang == 'JA'%}
 		{% include 'vocabulary_jp_info.html' %}
