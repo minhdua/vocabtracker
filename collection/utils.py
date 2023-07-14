@@ -4,6 +4,8 @@ import re
 import urllib.request
 from typing import List
 
+from collection.enums import LanguageEnum
+
 
 def extract_urls(keyword: str, filetype: str = 'png', limit: int = 1, offset: int = 1, size: str = None) -> List[str]:
     extensions = [f'.{filetype}'] if filetype else []
@@ -62,6 +64,10 @@ def is_kanji(word):
     match = kanji_pattern.search(word)
     return match is not None
 
+def if_japanese_and_has_kanji(word):
+    if word.topic.language == LanguageEnum.JAPANESE and word.kanji:
+        return True
+    return False
 
 def find_item_by_key(items, word, key):
     for item in items:

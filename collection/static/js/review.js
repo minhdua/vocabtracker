@@ -101,7 +101,7 @@ $(document).ready(function () {
           .css('color', '#b7e1cd')
           .css('background-color', '#0f5132')
         if (!flagUncheckIfNull) {
-          $(element).find('input[name="flag"').prop('checked', false)
+          $(element).find('input[name="flag"]').prop('checked', false)
         }
       } else {
         if (!selectedAnswer && flagUncheckIfNull) {
@@ -116,16 +116,16 @@ $(document).ready(function () {
           .css('color', '#1e4477')
           .css('background-color', '#cfe2f3')
 
-        $(element).find('input[name="flag"').prop('checked', true)
+        $(element).find('input[name="flag"]').prop('checked', true)
       }
 
       var flag = false
-      if ($(element).find('input[name="flag"').is(':checked')) {
+      if ($(element).find('input[name="flag"]').is(':checked')) {
         flag = true
       }
 
       var flagUncheckIfNull = false
-      if ($(element).find('input[name="uncheckifnull"').is(':checked')) {
+      if ($(element).find('input[name="uncheckifnull"]').is(':checked')) {
         flagUncheckIfNull = true
       }
 

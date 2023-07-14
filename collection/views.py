@@ -217,7 +217,11 @@ def pronunciation_or_word(words):
     return words_convert
 
 def find_most_similar_words(word, word_list):
-    distances = [(w, distance(word.word, w.word)) for w in word_list]
+    distances = []
+    for w in word_list:
+        word_1 = word.kanji if word.topic.language == LanguageEnum.JAPANESE else word.word
+        word_2 = w.kanji if w.topic.language == LanguageEnum.JAPANESE else w.word
+        distances.append((w, distance(word_1, word_2)))
     sorted_distances = sorted(distances, key=lambda x: x[1])
     return [w[0] for w in sorted_distances[:3]]
 
@@ -226,7 +230,11 @@ def review(request):
     #if not topic_ids then get all topics
     if not topic_ids:
         topic_ids = Topic.objects.all().values_list('id', flat=True)
+    topics = Topic.objects.filter(id__in=topic_ids).order_by('index', 'id')
     vocabularies = Vocabulary.objects.filter(topic__in=topic_ids).order_by('id')
+    for topic in topics:
+        if topic.language == LanguageEnum.JAPANESE:
+            vocabularies = JPVocab.objects.filter(topic__in=topic_ids).order_by('id')
     from_word = int(request.GET.get('from', 0))
     to_word = int(request.GET.get('to', len(vocabularies)))
     vocabularies = list(vocabularies[from_word:to_word+1])
@@ -241,22 +249,29 @@ def review(request):
         noise_words = find_most_similar_words(vocab,list(noise_words))
         shuffle(noise_words)
         # mode = random.choice(TEST_MODE_CHOICES)
-        mode = ('word','')
-        correct_answer = vocab.word
+        modes = ('word','meaning')
+        mode = random.choice(modes)
+
+        word = vocab.kanji if utils.if_japanese_and_has_kanji(vocab) else vocab.word
+        noise_word_1 = noise_words[0].kanji if utils.if_japanese_and_has_kanji(noise_words[0]) else noise_words[0].word
+        noise_word_2 =  noise_words[1].kanji if utils.if_japanese_and_has_kanji(noise_words[1]) else noise_words[1].word
+        noise_word_3 =  noise_words[2].kanji if utils.if_japanese_and_has_kanji(noise_words[2]) else noise_words[2].word
+            
+        correct_answer = word
         question_text = ''
-        if mode[0] == 'meaning' :                                               
-            question_text = 'Meaning of "' + vocab.word +'" :'
+        if mode == 'meaning' :                                               
+            question_text = 'Meaning of "<a href="#" class="phonetic">' + word +'</a>" :'
             correct_answer = vocab.meaning
             answers = [noise_words[0].meaning, noise_words[1].meaning, noise_words[2].meaning, vocab.meaning]
-        elif mode[0] == 'pronunciation':
-            question_text = 'Pronunciation of "' + vocab.word +'" :'
+        elif mode == 'pronunciation':
+            question_text = 'Pronunciation of "' + word +'" :'
             correct_answer = vocab.pronunciation
             answers = [a for a in answers if a.pronunciation]
             answers = [noise_words[0].pronunciation, noise_words[1].pronunciation, noise_words[2].pronunciation, vocab.pronunciation]
-        elif mode[0] == 'word':
+        elif mode == 'word':
             question_text = 'Word of "' + vocab.meaning +'" :'
-            correct_answer = vocab.word
-            answers = [noise_words[0].word, noise_words[1].word, noise_words[2].word, vocab.word]
+            correct_answer = word
+            answers = [noise_word_1, noise_word_2, noise_word_3, word]
         
         shuffle(answers)
         question = {
@@ -267,7 +282,7 @@ def review(request):
             'distractors': answers,
             'flag':vocab.flag,
             'uncheck_ifnull':vocab.uncheck_ifnull,
-            'type': mode[0],
+            'type': mode,
         }
         questions.append(question)
     shuffle(questions)
