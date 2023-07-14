@@ -36,15 +36,18 @@ $(document).ready(function () {
     return vocabularies[currentIndex]
   }
 
+  function speechWord() {
+    var currentWord = getCurrentWord()
+    speech(currentWord.word, 'jp')
+    speech(currentWord.meaning, 'vi')
+  }
+
   function startInterval() {
-    if (intervalId) {
-      clearInterval(intervalId)
-    }
+    stopInterval() // Dừng interval hiện tại trước khi bắt đầu một interval mới
+
     intervalId = setInterval(function () {
       if (soundOn) {
-        var currentWord = getCurrentWord()
-        speech(currentWord.word)
-        speech(currentWord.meaning, 'vi-VN', 0.5)
+        speechWord()
       }
     }, 5000)
   }
@@ -113,9 +116,9 @@ $(document).ready(function () {
     if (isRepeat) {
       startInterval()
     } else {
-      stopInterval()
       if (soundOn) {
-        speech(currentWord.word)
+        stopInterval()
+        speechWord()
       }
     }
     checkOnOffButton()
@@ -327,7 +330,7 @@ $(document).ready(function () {
     var isCommands = false
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i].trim()
-      if (line.startsWith('/pre')) {
+      if (line.startsWith('/pre') || line.startsWith('/prev')) {
         var skipNum = 1
         var tokens = line.split(' ')
         if (tokens.length > 1) {
@@ -341,7 +344,7 @@ $(document).ready(function () {
         clearInput()
         resetTimer()
         isCommands = true
-      } else if (line.startsWith('/next')) {
+      } else if (line.startsWith('/next') || line.startsWith('/n')) {
         var skipNum = 1
         var tokens = line.split(' ')
         if (tokens.length > 1) {
@@ -355,7 +358,7 @@ $(document).ready(function () {
         clearInput()
         resetTimer()
         isCommands = true
-      } else if (line.startsWith('/goto')) {
+      } else if (line.startsWith('/goto') || line.startsWith('/g')) {
         let tokens = line.split(' ')
         if (tokens.length > 1) {
           let gotoIndex = parseInt(tokens[1])
@@ -372,17 +375,17 @@ $(document).ready(function () {
         clearInput()
         isCommands = true
         resetTimer()
-      } else if (line.startsWith('/sound --off')) {
+      } else if (line.startsWith('/sound --off') || line.startsWith('/soff')) {
         soundOn = false
         displayWord()
         clearInput()
         isCommands = true
-      } else if (line.startsWith('/sound --on')) {
+      } else if (line.startsWith('/sound --on') || line.startsWith('/son')) {
         soundOn = true
         displayWord()
         clearInput()
         isCommands = true
-      } else if (line.startsWith('/flag')) {
+      } else if (line.startsWith('/flag') || line.startsWith('/f')) {
         let tokens = line.split(' ')
         if (tokens.length > 1) {
           if (tokens[1] === '--on') {
